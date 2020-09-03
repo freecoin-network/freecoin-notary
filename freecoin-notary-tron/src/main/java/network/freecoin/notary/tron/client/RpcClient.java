@@ -7,8 +7,10 @@ import io.grpc.ManagedChannelBuilder;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import network.freecoin.notary.tron.api.GrpcAPI.AddressPrKeyPairMessage;
+import network.freecoin.notary.tron.api.GrpcAPI.BlockExtention;
 import network.freecoin.notary.tron.api.GrpcAPI.BytesMessage;
 import network.freecoin.notary.tron.api.GrpcAPI.EmptyMessage;
+import network.freecoin.notary.tron.api.GrpcAPI.NumberMessage;
 import network.freecoin.notary.tron.api.GrpcAPI.Return;
 import network.freecoin.notary.tron.api.GrpcAPI.Return.response_code;
 import network.freecoin.notary.tron.api.GrpcAPI.TransactionExtention;
@@ -16,6 +18,7 @@ import network.freecoin.notary.tron.api.WalletGrpc;
 import network.freecoin.notary.tron.common.utils.ByteArray;
 import network.freecoin.notary.tron.protos.Contract;
 import network.freecoin.notary.tron.protos.Protocol.Account;
+import network.freecoin.notary.tron.protos.Protocol.Block;
 import network.freecoin.notary.tron.protos.Protocol.Transaction;
 import network.freecoin.notary.tron.protos.Protocol.TransactionInfo;
 
@@ -37,6 +40,12 @@ public class RpcClient {
     BytesMessage request = BytesMessage.newBuilder().setValue(bsTxid).build();
     TransactionInfo transactionInfo = blockingStub.getTransactionInfoById(request);
     return Optional.ofNullable(transactionInfo);
+  }
+
+  public Optional<Block> getBlockByNum(long blockNum) {
+    NumberMessage request = NumberMessage.newBuilder().setNum(blockNum).build();
+    Block block = blockingStub.getBlockByNum(request);
+    return Optional.ofNullable(block);
   }
 
   public boolean broadcastTransaction(Transaction signaturedTransaction) {

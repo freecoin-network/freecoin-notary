@@ -1,17 +1,19 @@
 package network.freecoin.notary.tron.service;
 
-import io.grpc.NameResolver.Args;
-import java.util.List;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import network.freecoin.notary.tron.api.GrpcAPI.BlockExtention;
 import network.freecoin.notary.tron.client.WalletClient;
 import network.freecoin.notary.tron.config.TronConfig;
+import network.freecoin.notary.tron.protos.Protocol.Block;
+import network.freecoin.notary.tron.protos.Protocol.TransactionInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class NormalTxService {
+public class BlockInfoService {
 
   private WalletClient normalWallet;
   @Autowired
@@ -30,9 +32,13 @@ public class NormalTxService {
     normalWallet = new WalletClient(fullNode, tronConfig.getPrivateKey());
   }
 
-  public String sendTrx(String to, long amount) {
-    return normalWallet.sendTrx(to, amount);
+  public TransactionInfo getTransactionInfoById(String txID) {
+    Optional<TransactionInfo> transactionInfoOptional = normalWallet.getTransactionInfoById(txID);
+    return transactionInfoOptional.orElse(null);
   }
 
-
+  public Block getBlockByNum(long blockNum) {
+    Optional<Block> blockOptional = normalWallet.getBlockByNum(blockNum);
+    return blockOptional.orElse(null);
+  }
 }

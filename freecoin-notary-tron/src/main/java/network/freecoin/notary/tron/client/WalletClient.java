@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import network.freecoin.notary.tron.api.GrpcAPI.AddressPrKeyPairMessage;
+import network.freecoin.notary.tron.api.GrpcAPI.BlockExtention;
+import network.freecoin.notary.tron.api.GrpcAPI.BytesMessage;
 import network.freecoin.notary.tron.api.GrpcAPI.EmptyMessage;
+import network.freecoin.notary.tron.api.GrpcAPI.NumberMessage;
 import network.freecoin.notary.tron.api.GrpcAPI.Return;
 import network.freecoin.notary.tron.api.GrpcAPI.TransactionExtention;
 import network.freecoin.notary.tron.common.crypto.ECKey;
@@ -21,6 +24,7 @@ import network.freecoin.notary.tron.exception.TransactionInfoNotFoundException;
 import network.freecoin.notary.tron.protos.Contract;
 import network.freecoin.notary.tron.protos.Contract.TransferContract;
 import network.freecoin.notary.tron.protos.Protocol.Account;
+import network.freecoin.notary.tron.protos.Protocol.Block;
 import network.freecoin.notary.tron.protos.Protocol.Transaction;
 import network.freecoin.notary.tron.protos.Protocol.Transaction.Result;
 import network.freecoin.notary.tron.protos.Protocol.Transaction.Result.code;
@@ -52,6 +56,10 @@ public class WalletClient {
 
   public Optional<TransactionInfo> getTransactionInfoById(String txID) {
     return rpcCli.getTransactionInfoById(txID);
+  }
+
+  public Optional<Block> getBlockByNum(long blockNum) {
+    return rpcCli.getBlockByNum(blockNum);
   }
 
   public Account queryAccount() {
