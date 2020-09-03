@@ -19,7 +19,8 @@
 		<module>freecoin-notary-starter</module>
 		<module>freecoin-notary-tron</module>
 		<module>freecoin-notary-ethereum</module>
-	</modules>
+        <module>freecoin-notary-core</module>
+    </modules>
 	<packaging>pom</packaging>
 
   <properties>

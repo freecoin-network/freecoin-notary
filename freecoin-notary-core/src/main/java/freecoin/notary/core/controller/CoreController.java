@@ -1,8 +1,6 @@
-package network.freecoin.notary.ethereum.controller;
+package freecoin.notary.core.controller;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author pengyuxiang

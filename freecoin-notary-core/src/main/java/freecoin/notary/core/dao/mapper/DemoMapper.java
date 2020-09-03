@@ -1,4 +1,4 @@
-package network.freecoin.notary.ethereum.dao.mapper;
+package freecoin.notary.core.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
