@@ -1,4 +1,4 @@
-package network.freecoin.notary.starter;
+package network.freecoin.notary.core;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

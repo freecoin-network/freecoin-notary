@@ -1,4 +1,4 @@
-package freecoin.notary.core.controller;
+package network.freecoin.notary.core.controller;
 
 import org.springframework.stereotype.Component;
 

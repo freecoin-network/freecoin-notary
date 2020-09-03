@@ -1,4 +1,4 @@
-package freecoin.notary.core.dao.entity;
+package network.freecoin.notary.core.dao.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
