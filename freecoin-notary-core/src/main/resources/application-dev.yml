@@ -2,7 +2,7 @@ variable:
   profiles: dev
 spring:
   application:
-    name: freecoin-notary-tron
+    name: freecoin-notary-core
 
 tron:
   fullnode:

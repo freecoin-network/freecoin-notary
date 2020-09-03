@@ -3,7 +3,6 @@ package network.freecoin.notary.tron.service;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import network.freecoin.notary.tron.api.GrpcAPI.BlockExtention;
 import network.freecoin.notary.tron.client.WalletClient;
 import network.freecoin.notary.tron.config.TronConfig;
 import network.freecoin.notary.tron.protos.Protocol.Block;
