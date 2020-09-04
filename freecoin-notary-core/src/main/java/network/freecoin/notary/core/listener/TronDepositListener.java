@@ -1,7 +1,7 @@
 package network.freecoin.notary.core.listener;
 
 import lombok.extern.slf4j.Slf4j;
-import network.freecoin.notary.core.common.ShareData;
+import network.freecoin.notary.core.common.DataPool;
 import network.freecoin.notary.core.dto.DepositData;
 import network.freecoin.notary.tron.common.utils.Sha256Hash;
 import network.freecoin.notary.tron.protos.Protocol.Block;
@@ -19,7 +19,7 @@ public class TronDepositListener {
   @Autowired
   private BlockInfoService blockInfoService;
   @Autowired
-  private ShareData shareData;
+  private DataPool dataPool;
   private volatile boolean isRunning;
 
   public TronDepositListener() {
@@ -39,6 +39,7 @@ public class TronDepositListener {
         }
         long sleepTime = 0;
         if (sleepTime > 0) {
+
           try {
             Thread.sleep(sleepTime);
           } catch (InterruptedException e) {
@@ -56,7 +57,7 @@ public class TronDepositListener {
             .amount(0)
             .txOnSideChain("")
             .build();
-        shareData.produce(depositData);
+        dataPool.produce(depositData);
       }
     }
   }
