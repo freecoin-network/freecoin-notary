@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class DataPool {
+public class TronDepositPool {
 
   private BlockingQueue<DepositData> queue;
 
-  public DataPool() {
+  public TronDepositPool() {
     this.queue = new LinkedBlockingQueue<>();
   }
 

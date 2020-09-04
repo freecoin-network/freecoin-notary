@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class DepositData {
 
+  private long blockNum;
   private long mintProposalId;
   private String senderOnSideChain;
   private long amount;
