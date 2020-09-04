@@ -1,15 +1,13 @@
 package network.freecoin.notary.ethereum.services;
 
-import java.io.IOException;
+import java.util.List;
 
 import network.freecoin.notary.ethereum.configuration.EthConfig;
+import network.freecoin.notary.ethereum.configuration.EthContractConfig;
+import network.freecoin.notary.ethereum.configuration.EthWallteConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthBlockNumber;
-import org.web3j.protocol.core.methods.response.EthGasPrice;
-import org.web3j.protocol.core.methods.response.Web3ClientVersion;
-import org.web3j.protocol.http.HttpService;
 
 /**
  * @author pengyuxiang
@@ -21,14 +19,21 @@ public class EthService {
 
     @Autowired
     private EthConfig ethConfig;
+
+    @Autowired
+    private EthWallteConfig ethWallteConfig;
+
+    @Autowired
+    private EthContractConfig ethContractConfig;
+
+    @Autowired
     private Web3j web3j;
 
 
     /**
      * 选择验证者
      */
-    public String genSinger(){
-
-        return "";
+    public List<String> genSinger(){
+        return null;
     }
 }
