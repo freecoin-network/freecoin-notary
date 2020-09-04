@@ -13,6 +13,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-@TableName("XXX")
-public class DemoEntity {
+@TableName("T_TRX_OFFSET")
+public class OffsetEntity {
 }
