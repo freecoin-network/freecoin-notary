@@ -2,9 +2,9 @@ spring:
   profiles:
     active: dev
   datasource:
-    username: xx
-    password: xxx
-    url: xxx
+    username: freecoin
+    password: fcn12#$
+    url: jdbc:mysql://13.52.79.130:3306/freecoin?characterEncoding=utf-8&useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -37,4 +37,5 @@ eth:
   contract:
     address: xxx
   wallet:
-    address: xxx
+    path: /Users/pengyuxiang/freecoin/wallet1
+  gaslimit: 21000
