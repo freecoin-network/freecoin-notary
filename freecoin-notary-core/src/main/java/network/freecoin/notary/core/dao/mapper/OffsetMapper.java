@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 
 @Mapper
 @Repository
-public interface DemoMapper extends BaseMapper<DemoMapper>{
+public interface OffsetMapper extends BaseMapper<OffsetMapper>{
 }
