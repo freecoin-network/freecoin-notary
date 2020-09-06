@@ -39,6 +39,8 @@ CREATE TABLE `tron_deposit_meta` (
   UNIQUE KEY `uk_mint_proposal_id` (`mint_proposal_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+INSERT INTO tron_deposit_meta(block_num, mint_proposal_id) VALUES(22953366, 0);
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

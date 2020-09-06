@@ -10,7 +10,6 @@ import network.freecoin.notary.tron.protos.Contract;
 import network.freecoin.notary.tron.protos.Contract.AccountCreateContract;
 import network.freecoin.notary.tron.protos.Contract.AccountUpdateContract;
 import network.freecoin.notary.tron.protos.Contract.AssetIssueContract;
-import network.freecoin.notary.tron.protos.Contract.CreateSmartContract;
 import network.freecoin.notary.tron.protos.Contract.ExchangeCreateContract;
 import network.freecoin.notary.tron.protos.Contract.ExchangeInjectContract;
 import network.freecoin.notary.tron.protos.Contract.ExchangeTransactionContract;
@@ -23,7 +22,6 @@ import network.freecoin.notary.tron.protos.Contract.ProposalDeleteContract;
 import network.freecoin.notary.tron.protos.Contract.SetAccountIdContract;
 import network.freecoin.notary.tron.protos.Contract.TransferAssetContract;
 import network.freecoin.notary.tron.protos.Contract.TransferContract;
-import network.freecoin.notary.tron.protos.Contract.TriggerSmartContract;
 import network.freecoin.notary.tron.protos.Contract.UnfreezeAssetContract;
 import network.freecoin.notary.tron.protos.Contract.UnfreezeBalanceContract;
 import network.freecoin.notary.tron.protos.Contract.UpdateAssetContract;
@@ -35,9 +33,7 @@ import network.freecoin.notary.tron.protos.Contract.WitnessCreateContract;
 import network.freecoin.notary.tron.protos.Contract.WitnessUpdateContract;
 import network.freecoin.notary.tron.protos.Protocol.Transaction;
 import org.spongycastle.util.encoders.Hex;
-import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
 public class TronTxUtil {
 
@@ -186,6 +182,8 @@ public class TronTxUtil {
       switch (contract.getType()) {
         case TransferContract:
           return contractParameter.unpack(TransferContract.class).getAmount();
+        // when smart contract, the value may be > 0 but have not transfer successful
+        //  because of contract revert or assert
         // case TriggerSmartContract:
         //   return contractParameter.unpack(TriggerSmartContract.class).getCallValue();
         // case CreateSmartContract:

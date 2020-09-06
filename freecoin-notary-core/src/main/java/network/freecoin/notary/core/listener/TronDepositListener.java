@@ -45,9 +45,9 @@ public class TronDepositListener {
       TronDepositMeta tronDepositMeta = TronDepositMeta.builder()
           .blockNum(blockNum)
           .mintProposalId(mintProposalId)
+          .id(ConstSetting.TRON_DEPOSIT_META_ID)
           .build();
-      // fixme: insert ignore
-      tronDepositMetaMapper.insert(tronDepositMeta);
+      tronDepositMetaMapper.updateById(tronDepositMeta);
 
       Block block = blockInfoService.getBlockByNum(fromBlockNum);
       logger.debug("block: {}", block);
@@ -59,10 +59,9 @@ public class TronDepositListener {
         String sender = tronTxUtil.getOwner();
         long amount = tronTxUtil.getSunValue();
         String txId = tronTxUtil.getTxId();
-        // todo: test: ms ?
         long txTime = tronTxUtil.getTimestamp();
         long now = System.currentTimeMillis();
-        long sleepTime = txTime + ConstSetting.relayMs - now;
+        long sleepTime = txTime + ConstSetting.RELAY_MS - now;
         if (sleepTime > 0) {
           try {
             Thread.sleep(sleepTime);
@@ -101,9 +100,12 @@ public class TronDepositListener {
   public boolean filter(TronTxUtil tronTxUtil) {
     // the transaction must be success and solidity, especially when smart contract
     String toAddress = tronTxUtil.getToAddress();
-    if (!tronNotaryAddressPool.contain(toAddress)) {
+    if (toAddress == null) {
       return true;
     }
+    // if (!tronNotaryAddressPool.contain(toAddress)) {
+    //   return true;
+    // }
     return false;
   }
 

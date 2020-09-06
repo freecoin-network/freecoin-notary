@@ -1,5 +1,5 @@
 variable:
-  profiles: dev
+  profiles: local
 spring:
   application:
     name: freecoin-notary-core
