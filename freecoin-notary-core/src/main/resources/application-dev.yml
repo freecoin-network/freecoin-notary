@@ -40,7 +40,7 @@ eth:
     address: xxx
   wallet:
     path: /Users/pengyuxiang/freecoin/wallet1
-  gaslimit: 21000
+  gaslimit: 2100000
 
 tron:
   fullnode:

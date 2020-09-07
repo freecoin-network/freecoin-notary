@@ -30,6 +30,8 @@ public class TronDepositListener {
   private TronDepositMapper tronDepositMapper;
   @Autowired
   private TronDepositMetaMapper tronDepositMetaMapper;
+  @Autowired
+  private EthMinter ethMinter;
 
   private volatile boolean isRunning;
 
@@ -83,6 +85,7 @@ public class TronDepositListener {
         // TransactionInfo transactionInfo = blockInfoService.getTransactionInfoById(txId);
         // logger.debug("transactionInfo: {}", transactionInfo);
         // todo: handle this
+        ethMinter.mint(mintProposalId, sender, amount, txId);
         DepositData depositData = DepositData.builder()
             .blockNum(blockNum)
             .mintProposalId(mintProposalId)
