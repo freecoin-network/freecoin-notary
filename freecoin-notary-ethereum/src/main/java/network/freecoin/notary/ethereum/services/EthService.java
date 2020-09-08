@@ -57,7 +57,6 @@ public class EthService {
      */
     public Credentials getWallet() {
         List<Credentials> wallets = ethWallteConfig.wallets().getWalletList();
-
         if (wallets.size() > 0) return wallets.get(0);
         return null;
     }

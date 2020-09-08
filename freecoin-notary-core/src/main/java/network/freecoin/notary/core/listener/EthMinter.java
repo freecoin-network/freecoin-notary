@@ -41,6 +41,7 @@ public class EthMinter {
     }
 
     public void run() {
+        System.out.println("start run eth");
         while (isRunning) {
             DepositData d = tronDepositPool.consume();
             Credentials c = ethService.getWallet();

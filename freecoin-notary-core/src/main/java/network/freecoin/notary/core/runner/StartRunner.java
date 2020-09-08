@@ -33,7 +33,6 @@ public class StartRunner implements ApplicationRunner {
     //  2. start listener
     // todo: add from eth contract
     tronNotaryAddressPool.add(Collections.singletonList("TPynyGFnMP64p4vbjFbDrzqNBUEJvaErDT"));
-    ethMinter.run();
     TronDepositMeta tronDepositMeta = tronDepositMetaMapper.selectById(ConstSetting.TRON_DEPOSIT_META_ID);
     tronDepositListener.run(tronDepositMeta.getBlockNum(),
         tronDepositMeta.getMintProposalId());
