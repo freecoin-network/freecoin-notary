@@ -9,23 +9,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.*;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.crypto.*;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,10 +53,20 @@ public class EthService {
 
 
     /**
+     * @return
+     */
+    public Credentials getWallet() {
+        List<Credentials> wallets = ethWallteConfig.wallets().getWalletList();
+
+        if (wallets.size() > 0) return wallets.get(0);
+        return null;
+    }
+
+    /**
      * 选择验证者
      */
     @SneakyThrows
-    public List<Credentials> genSinger(){
+    public List<Credentials> genSinger() {
         int count = ethConfig.getSinger();
         List<Credentials> cs = ethWallteConfig.wallets().getWalletList();
         if (count > cs.size()) throw new Exception();
@@ -71,7 +81,7 @@ public class EthService {
     }
 
     @SneakyThrows
-    public String getEthAddrByTrx(Credentials credentials, String trxAddr){
+    public String getEthAddrByTrx(Credentials credentials, String trxAddr) {
         BigInteger nonce = getNonce(credentials.getAddress());
         BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
         String to = ethContractConfig.getAddress();
@@ -102,10 +112,23 @@ public class EthService {
         BigInteger gasLimit = ethConfig.getGaslimit();
         String data = buildDepositRequest(proposalId, txSender, amout, txOnSideChain);
         RawTransaction t = RawTransaction.createTransaction(
-                nonce, gasPrice, gasLimit, to,  data
+                nonce, gasPrice, gasLimit, to, data
         );
         String hex = SignMessage(credentials, t);
         EthSendTransaction e = web3j.ethSendRawTransaction(hex).sendAsync().get();
+        return true;
+    }
+
+    @SneakyThrows
+    public boolean verifyMintTransaction(Credentials credentials, long proposalId, String txSender, long amout, String txOnSideChain) {
+        String from = credentials.getAddress();
+        BigInteger nonce = getNonce(from);
+        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        String to = ethContractConfig.getAddress();
+        BigInteger gasLimit = ethConfig.getGaslimit();
+        String data = buildVerifyRequest(proposalId, txSender, amout, txOnSideChain);
+        EthCall response = web3j.ethCall(Transaction.createEthCallTransaction(credentials.getAddress(), to, data), DefaultBlockParameterName.LATEST).send();
+        String result = response.getResult();
         return true;
     }
 
@@ -119,6 +142,20 @@ public class EthService {
         input.add(new Utf8String(txOnSideChain));
         output.add(new TypeReference<Bool>() {});
         Function function = new Function(ConstSetting.DEPOSIT_CONFIRM, input, output);
+        String data = FunctionEncoder.encode(function);
+        return data;
+    }
+
+    public String buildVerifyRequest(long proposalId, String txSender, long amout, String txOnSideChain) {
+        List<Type> input = new ArrayList<>();
+        List<TypeReference<?>> output = new ArrayList<>();
+        input.add(new Uint256(proposalId));
+        input.add(new Utf8String(txSender));
+        input.add(new Uint256(amout));
+        input.add(new Utf8String(txOnSideChain));
+        output.add(new TypeReference<Bool>() {
+        });
+        Function function = new Function(ConstSetting.VERIFY_MINT, input, output);
         String data = FunctionEncoder.encode(function);
         return data;
     }
