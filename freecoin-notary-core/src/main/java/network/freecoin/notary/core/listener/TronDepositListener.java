@@ -84,7 +84,6 @@ public class TronDepositListener {
         tronDepositMapper.insert(tronDeposit);
         // TransactionInfo transactionInfo = blockInfoService.getTransactionInfoById(txId);
         // logger.debug("transactionInfo: {}", transactionInfo);
-        // todo: handle this
         ethMinter.mint(mintProposalId, sender, amount, txId);
         DepositData depositData = DepositData.builder()
             .blockNum(blockNum)
@@ -103,12 +102,9 @@ public class TronDepositListener {
   public boolean filter(TronTxUtil tronTxUtil) {
     // the transaction must be success and solidity, especially when smart contract
     String toAddress = tronTxUtil.getToAddress();
-    if (toAddress == null) {
+    if (!tronNotaryAddressPool.contain(toAddress)) {
       return true;
     }
-    // if (!tronNotaryAddressPool.contain(toAddress)) {
-    //   return true;
-    // }
     return false;
   }
 
