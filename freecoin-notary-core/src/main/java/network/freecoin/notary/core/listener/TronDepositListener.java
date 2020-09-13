@@ -50,9 +50,9 @@ public class TronDepositListener {
           .id(ConstSetting.TRON_DEPOSIT_META_ID)
           .build();
       tronDepositMetaMapper.updateById(tronDepositMeta);
-      Block block = blockInfoService.getBlockByNum(fromBlockNum);
+      Block block = blockInfoService.getBlockByNum(blockNum);
       if (block.equals(Block.getDefaultInstance())) {
-        logger.info("waiting for generating new block: {}", fromBlockNum);
+        logger.info("waiting for generating new block: {}", blockNum);
         try {
           Thread.sleep(ConstSetting.WAITING_FOR_NEW_BLOCK__MS);
         } catch (InterruptedException e) {
