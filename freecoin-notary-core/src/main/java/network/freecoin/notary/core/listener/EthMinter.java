@@ -59,7 +59,7 @@ public class EthMinter {
                 if(--retryCount > 0) break;
             }
             UpdateWrapper<TronDeposit> uw = new UpdateWrapper();
-            uw.eq("proposalId", proposalId);
+            uw.eq("mint_proposal_id", proposalId);
             TronDeposit newDeposit = TronDeposit.builder().status(1).build();
             if(retryCount == 0) ; //todo failed
             if(retryCount > 0) {
