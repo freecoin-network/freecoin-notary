@@ -29,7 +29,16 @@ public class TronNotaryAddressPool {
     }
   }
 
-  public void add(List<String> addrList) {
+  public void addOne(String addr) {
+    setLock.writeLock().lock();
+    try {
+      addressSet.add(addr);
+    } finally {
+      setLock.writeLock().unlock();
+    }
+  }
+
+  public void addList(List<String> addrList) {
     setLock.writeLock().lock();
     try {
       addressSet.addAll(addrList);

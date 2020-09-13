@@ -39,7 +39,19 @@ CREATE TABLE `tron_deposit_meta` (
   UNIQUE KEY `uk_mint_proposal_id` (`mint_proposal_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+/*Table structure for table `tron_deposit_address` */
+
+DROP TABLE IF EXISTS `tron_deposit_address`;
+
+CREATE TABLE `tron_deposit_address` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `address` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'address',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_address` (`address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 INSERT INTO tron_deposit_meta(block_num, mint_proposal_id) VALUES(22953366, 0);
+INSERT INTO tron_deposit_address(`address`) VALUES("TPynyGFnMP64p4vbjFbDrzqNBUEJvaErDT");
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

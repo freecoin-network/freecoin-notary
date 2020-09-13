@@ -50,8 +50,17 @@ public class TronDepositListener {
           .id(ConstSetting.TRON_DEPOSIT_META_ID)
           .build();
       tronDepositMetaMapper.updateById(tronDepositMeta);
-
       Block block = blockInfoService.getBlockByNum(fromBlockNum);
+      if (block.equals(Block.getDefaultInstance())) {
+        logger.info("waiting for generating new block: {}", fromBlockNum);
+        try {
+          Thread.sleep(ConstSetting.WAITING_FOR_NEW_BLOCK__MS);
+        } catch (InterruptedException e) {
+          logger.warn("interrupted exception", e);
+          Thread.currentThread().interrupt();
+        }
+        continue;
+      }
       logger.debug("block: {}", block);
       for (Transaction transaction : block.getTransactionsList()) {
         TronTxUtil tronTxUtil = new TronTxUtil(transaction);
@@ -100,7 +109,8 @@ public class TronDepositListener {
   }
 
   public boolean filter(TronTxUtil tronTxUtil) {
-    // the transaction must be success and solidity, especially when smart contract
+    // the transaction must be success from solidity node,
+    //  especially when smart contract
     String toAddress = tronTxUtil.getToAddress();
     if (!tronNotaryAddressPool.contain(toAddress)) {
       return true;
