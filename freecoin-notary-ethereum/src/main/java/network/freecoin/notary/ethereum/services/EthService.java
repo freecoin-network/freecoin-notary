@@ -9,6 +9,7 @@ import network.freecoin.notary.ethereum.configuration.EthWallteConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
@@ -88,7 +89,7 @@ public class EthService {
         } catch (IOException e) {
             logger.error("get gas Price Error: {}", e.getMessage());
         }
-        String to = "0xD313C042d996f29db672B49BC3b1e018E065dbe7";
+        String to = ethContractConfig.getAddress();
         BigInteger gasLimit = ethConfig.getGaslimit();
         String data = buildDepositRequest(proposalId, txSender, amout, txOnSideChain);
         RawTransaction t = RawTransaction.createTransaction(
@@ -106,16 +107,15 @@ public class EthService {
     }
 
     @SneakyThrows
-    public boolean verifyMintTransaction(Credentials credentials, long proposalId, String txSender, long amout, String txOnSideChain) {
-        String from = credentials.getAddress();
-        BigInteger nonce = getNonce(from);
-        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+    public boolean verifyMintTransaction(Credentials credentials, long proposalId) {
         String to = ethContractConfig.getAddress();
-        BigInteger gasLimit = ethConfig.getGaslimit();
-        String data = buildVerifyRequest(proposalId, txSender, amout, txOnSideChain);
-        EthCall response = web3j.ethCall(Transaction.createEthCallTransaction(credentials.getAddress(), to, data), DefaultBlockParameterName.LATEST).send();
+        Function f = buildVerifyRequest(proposalId);
+        EthCall response = web3j.ethCall(Transaction.createEthCallTransaction(credentials.getAddress(), to, FunctionEncoder.encode(f)), DefaultBlockParameterName.LATEST).send();
         String result = response.getResult();
-        return true;
+        if(result.equals("0x")) return false;
+        List<Type> out = FunctionReturnDecoder.decode(result, f.getOutputParameters());
+        Boolean bool = (Boolean) out.get(0).getValue();
+        return bool;
     }
 
 
@@ -125,6 +125,7 @@ public class EthService {
         input.add(new Uint256(proposalId));
         input.add(new Utf8String(txSender));
         input.add(new Uint256(amout));
+        input.add(new Uint256(amout));
         input.add(new Utf8String(txOnSideChain));
         output.add(new TypeReference<Bool>() {});
         Function function = new Function(ConstSetting.DEPOSIT_CONFIRM, input, output);
@@ -132,18 +133,14 @@ public class EthService {
         return data;
     }
 
-    public String buildVerifyRequest(long proposalId, String txSender, long amout, String txOnSideChain) {
+    public Function buildVerifyRequest(long proposalId) {
         List<Type> input = new ArrayList<>();
         List<TypeReference<?>> output = new ArrayList<>();
         input.add(new Uint256(proposalId));
-        input.add(new Utf8String(txSender));
-        input.add(new Uint256(amout));
-        input.add(new Utf8String(txOnSideChain));
         output.add(new TypeReference<Bool>() {
         });
         Function function = new Function(ConstSetting.VERIFY_MINT, input, output);
-        String data = FunctionEncoder.encode(function);
-        return data;
+        return function;
     }
 
 

@@ -17,6 +17,6 @@ public class EthStartRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments applicationArguments) {
         new Thread(() -> ethMinter.run()).start();
-        System.out.println("end ethStartRunner");
+        logger.info("end ethStartRunner");
     }
 }

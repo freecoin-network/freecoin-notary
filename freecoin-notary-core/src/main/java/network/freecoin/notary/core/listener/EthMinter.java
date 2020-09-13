@@ -1,6 +1,7 @@
 package network.freecoin.notary.core.listener;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import network.freecoin.notary.core.common.TronDepositPool;
 import network.freecoin.notary.core.dao.entity.TronDeposit;
@@ -41,29 +42,37 @@ public class EthMinter {
     }
 
     public void run() {
-        System.out.println("start run eth");
+        logger.info("start run ethListener");
         while (isRunning) {
             DepositData d = tronDepositPool.consume();
-            Credentials c = ethService.getWallet();
             long proposalId = d.getMintProposalId();
+            Credentials c = ethService.getWallet();
             String trxSender = d.getSenderOnSideChain();
             long amout = d.getAmount();
             String txOnSideChain = d.getTxOnSideChain();
-            int retryCount = 5;
-            while(false == ethService.verifyMintTransaction(c, proposalId, trxSender, amout, txOnSideChain)) {
+            int retryCount = 6;
+            while(false == ethService.verifyMintTransaction(c, proposalId)) {
                 try {
                     Thread.sleep(30000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error("Thread Sleep {}", e.getMessage());
                 }
                 if(--retryCount > 0) break;
             }
             UpdateWrapper<TronDeposit> uw = new UpdateWrapper();
             uw.eq("mint_proposal_id", proposalId);
-            TronDeposit newDeposit = TronDeposit.builder().status(1).build();
-            if(retryCount == 0) ; //todo failed
-            if(retryCount > 0) {
+
+            if(retryCount == 0) {
+                TronDeposit newDeposit = TronDeposit.builder().
+                        mintProposalId(proposalId).amount(amout).txOnSideChain(txOnSideChain).senderOnSideChain(trxSender).status(2).build();
                 tronDepositMapper.update(newDeposit, uw);
+                logger.error("Mint Failed prososalId {}, amout {}", proposalId, amout);
+            }; //todo failed
+            if(retryCount > 0) {
+                TronDeposit newDeposit = TronDeposit.builder().
+                        mintProposalId(proposalId).amount(amout).txOnSideChain(txOnSideChain).senderOnSideChain(trxSender).status(1).build();
+                tronDepositMapper.update(newDeposit, uw);
+                logger.info("Mint Success prososalId {}, amout {}", proposalId, amout);
             }; //success
         }
     }
