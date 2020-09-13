@@ -57,7 +57,7 @@ public class EthMinter {
                 } catch (InterruptedException e) {
                     logger.error("Thread Sleep {}", e.getMessage());
                 }
-                if(--retryCount > 0) break;
+                if(--retryCount <= 0) break;
             }
             UpdateWrapper<TronDeposit> uw = new UpdateWrapper();
             uw.eq("mint_proposal_id", proposalId);
