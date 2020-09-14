@@ -22,6 +22,19 @@
   </modules>
   <packaging>pom</packaging>
 
+
+  <profiles>
+    <profile>
+      <id>local</id>
+      <properties>
+        <env>local</env>
+      </properties>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+
+  </profiles>
   <properties>
     <java.version>1.8</java.version>
   </properties>

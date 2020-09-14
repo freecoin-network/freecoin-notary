@@ -1,6 +1,7 @@
 package network.freecoin.notary.ethereum.services;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import network.freecoin.notary.ethereum.configuration.ConstSetting;
 import network.freecoin.notary.ethereum.configuration.EthConfig;
 import network.freecoin.notary.ethereum.configuration.EthContractConfig;
@@ -8,6 +9,7 @@ import network.freecoin.notary.ethereum.configuration.EthWallteConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
@@ -25,6 +27,7 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +40,7 @@ import java.util.concurrent.ExecutionException;
  */
 
 @Component
+@Slf4j
 public class EthService {
 
     @Autowired
@@ -66,47 +70,25 @@ public class EthService {
      */
     @SneakyThrows
     public List<Credentials> genSinger() {
-        int count = ethConfig.getSinger();
-        List<Credentials> cs = ethWallteConfig.wallets().getWalletList();
-        if (count > cs.size()) throw new Exception();
-        if (count == cs.size()) return cs;
-        List<Credentials> signers = new ArrayList<>();
-        Collections.copy(cs, signers);
-        while (signers.size() > count) {
-            int idx = (int) (System.currentTimeMillis() % signers.size());
-            signers.remove(idx);
-        }
-        return signers;
-    }
-
-    @SneakyThrows
-    public String getEthAddrByTrx(Credentials credentials, String trxAddr) {
-        BigInteger nonce = getNonce(credentials.getAddress());
-        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
-        String to = ethContractConfig.getAddress();
-        BigInteger gasLimit = ethConfig.getGaslimit();
-
-        List<Type> input = Collections.emptyList();
-        input.add(new Utf8String(trxAddr));
-        List<TypeReference<?>> output = new ArrayList<>();
-        TypeReference<Utf8String> t2 = new TypeReference<Utf8String>() {};
-        output.add(t2);
-        Function function = new Function(ConstSetting.GET_ETH_ADDR, input, output);
-        String data = FunctionEncoder.encode(function);
-        EthCall response = web3j.ethCall(Transaction.createEthCallTransaction(credentials.getAddress(), to, data), DefaultBlockParameterName.LATEST).sendAsync().get();
-        String result = response.getResult();
-        return result;
+        return ethWallteConfig.wallets().getWalletList();
     }
 
     /**
      * @param credentials
      * @return
      */
-    @SneakyThrows
-    public boolean sendTransaction(Credentials credentials, long proposalId, String txSender, long amout, String txOnSideChain) {
+
+    public void sendTransaction(Credentials credentials, long proposalId, String txSender, long amout, String txOnSideChain) {
+        logger.info("CreAddr {}, proposalId {}, txSender {}, ammout {}, txOnSideChain {} ",
+                credentials.getAddress(), proposalId, txSender, amout, txOnSideChain);
         String from = credentials.getAddress();
         BigInteger nonce = getNonce(from);
-        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        BigInteger gasPrice = null;
+        try {
+            gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        } catch (IOException e) {
+            logger.error("get gas Price Error: {}", e.getMessage());
+        }
         String to = ethContractConfig.getAddress();
         BigInteger gasLimit = ethConfig.getGaslimit();
         String data = buildDepositRequest(proposalId, txSender, amout, txOnSideChain);
@@ -114,21 +96,26 @@ public class EthService {
                 nonce, gasPrice, gasLimit, to, data
         );
         String hex = SignMessage(credentials, t);
-        EthSendTransaction e = web3j.ethSendRawTransaction(hex).sendAsync().get();
-        return true;
+        EthSendTransaction e = null;
+        try {
+            e = web3j.ethSendRawTransaction(hex).send();
+        } catch (IOException e1) {
+            logger.error("SendRawException {}", e1.getMessage());
+        }
+
+        logger.info("SendRawTransaction Result : {}", e.getResult());
     }
 
     @SneakyThrows
-    public boolean verifyMintTransaction(Credentials credentials, long proposalId, String txSender, long amout, String txOnSideChain) {
-        String from = credentials.getAddress();
-        BigInteger nonce = getNonce(from);
-        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+    public boolean verifyMintTransaction(Credentials credentials, long proposalId) {
         String to = ethContractConfig.getAddress();
-        BigInteger gasLimit = ethConfig.getGaslimit();
-        String data = buildVerifyRequest(proposalId, txSender, amout, txOnSideChain);
-        EthCall response = web3j.ethCall(Transaction.createEthCallTransaction(credentials.getAddress(), to, data), DefaultBlockParameterName.LATEST).send();
+        Function f = buildVerifyRequest(proposalId);
+        EthCall response = web3j.ethCall(Transaction.createEthCallTransaction(credentials.getAddress(), to, FunctionEncoder.encode(f)), DefaultBlockParameterName.LATEST).send();
         String result = response.getResult();
-        return true;
+        if(result.equals("0x")) return false;
+        List<Type> out = FunctionReturnDecoder.decode(result, f.getOutputParameters());
+        Boolean bool = (Boolean) out.get(0).getValue();
+        return bool;
     }
 
 
@@ -138,6 +125,7 @@ public class EthService {
         input.add(new Uint256(proposalId));
         input.add(new Utf8String(txSender));
         input.add(new Uint256(amout));
+        input.add(new Uint256(amout));
         input.add(new Utf8String(txOnSideChain));
         output.add(new TypeReference<Bool>() {});
         Function function = new Function(ConstSetting.DEPOSIT_CONFIRM, input, output);
@@ -145,18 +133,14 @@ public class EthService {
         return data;
     }
 
-    public String buildVerifyRequest(long proposalId, String txSender, long amout, String txOnSideChain) {
+    public Function buildVerifyRequest(long proposalId) {
         List<Type> input = new ArrayList<>();
         List<TypeReference<?>> output = new ArrayList<>();
         input.add(new Uint256(proposalId));
-        input.add(new Utf8String(txSender));
-        input.add(new Uint256(amout));
-        input.add(new Utf8String(txOnSideChain));
         output.add(new TypeReference<Bool>() {
         });
         Function function = new Function(ConstSetting.VERIFY_MINT, input, output);
-        String data = FunctionEncoder.encode(function);
-        return data;
+        return function;
     }
 
 
@@ -168,9 +152,14 @@ public class EthService {
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    private BigInteger getNonce(String address) throws ExecutionException, InterruptedException {
-        EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
-                ethConfig.getService(), DefaultBlockParameterName.LATEST).sendAsync().get();
+    private BigInteger getNonce(String address) {
+        EthGetTransactionCount ethGetTransactionCount = null;
+        try {
+            ethGetTransactionCount = web3j.ethGetTransactionCount(
+                    address, DefaultBlockParameterName.LATEST).send();
+        } catch (IOException e) {
+            logger.error("Address : {} Get Nonce Error{}", address);
+        }
         return ethGetTransactionCount.getTransactionCount();
     }
 

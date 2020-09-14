@@ -10,6 +10,6 @@ public class ConstSetting {
 
   public static final String GET_ETH_ADDR = "";
   public static final String DEPOSIT_CONFIRM = "depositConfirm";
-  public static final String VERIFY_MINT = "";
+  public static final String VERIFY_MINT = "getMintStatus";
 
 }
