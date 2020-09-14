@@ -18,12 +18,14 @@ CREATE TABLE `tron_deposit` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `block_num` bigint unsigned NOT NULL COMMENT 'block num',
   `mint_proposal_id` bigint unsigned NOT NULL COMMENT 'mint proposal id',
-  `sender_on_side_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'sender on sidechain',
+  `sender_on_side_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'sender on side chain',
   `amount` bigint unsigned NOT NULL COMMENT 'amount',
-  `tx_on_side_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'tx on sidechain',
+  `tx_on_side_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'tx on side chain',
+  `tx_index_on_side_chain` int unsigned NOT NULL COMMENT 'tx index on side chain',
   `status` tinyint unsigned NOT NULL COMMENT 'status',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_block_num_tx` (`block_num`,`tx_on_side_chain`),
+  UNIQUE KEY `uk_block_num_tx` (`block_num`,`tx_index_on_side_chain`),
+  UNIQUE KEY `uk_tx_id` (`tx_on_side_chain`),
   UNIQUE KEY `uk_mint_proposal_id` (`mint_proposal_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -34,9 +36,9 @@ DROP TABLE IF EXISTS `tron_deposit_meta`;
 CREATE TABLE `tron_deposit_meta` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `block_num` bigint unsigned NOT NULL COMMENT 'block num',
-  `mint_proposal_id` bigint unsigned DEFAULT NULL COMMENT 'mint proposal id',
+  `tx_index_on_side_chain` int unsigned NOT NULL COMMENT 'tx index on side chain',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_mint_proposal_id` (`mint_proposal_id`)
+  UNIQUE KEY `uk_block_num_tx` (`block_num`,`tx_index_on_side_chain`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `tron_deposit_address` */
@@ -50,8 +52,8 @@ CREATE TABLE `tron_deposit_address` (
   UNIQUE KEY `uk_address` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO tron_deposit_meta(block_num, mint_proposal_id) VALUES(22953366, 0);
-INSERT INTO tron_deposit_address(`address`) VALUES("TPynyGFnMP64p4vbjFbDrzqNBUEJvaErDT");
+INSERT INTO tron_deposit_meta(block_num, tx_index_on_side_chain) VALUES(22953366, 0);
+INSERT INTO tron_deposit_address(`address`) VALUES("TBt9iwwKiaM5Tuf24scDaaoQAHytPYQFq2");
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

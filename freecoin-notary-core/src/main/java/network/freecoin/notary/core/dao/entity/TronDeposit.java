@@ -18,6 +18,7 @@ public class TronDeposit {
   private String senderOnSideChain;
   private long amount;
   private String txOnSideChain;
-  // 0: toDeposit; 1: done
+  private int txIndexOnSideChain;
+  // 0: toHandle; 1: done; 2: fail
   private int status;
 }

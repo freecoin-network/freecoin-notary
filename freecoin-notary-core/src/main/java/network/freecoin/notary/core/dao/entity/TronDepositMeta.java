@@ -14,5 +14,5 @@ public class TronDepositMeta {
   @TableId(value = "id", type = IdType.AUTO)
   private long id;
   private long blockNum;
-  private long mintProposalId;
+  private int txIndexOnSideChain;
 }

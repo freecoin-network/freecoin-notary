@@ -41,16 +41,17 @@ public class EthMinter {
     }
 
     public void run() {
-        System.out.println("start run eth");
+        logger.info("start run eth");
         while (isRunning) {
             DepositData d = tronDepositPool.consume();
             Credentials c = ethService.getWallet();
             long proposalId = d.getMintProposalId();
             String trxSender = d.getSenderOnSideChain();
-            long amout = d.getAmount();
+            long amount = d.getAmount();
             String txOnSideChain = d.getTxOnSideChain();
             int retryCount = 5;
-            while(false == ethService.verifyMintTransaction(c, proposalId, trxSender, amout, txOnSideChain)) {
+            while(!ethService
+                .verifyMintTransaction(c, proposalId, trxSender, amount, txOnSideChain)) {
                 try {
                     Thread.sleep(30000);
                 } catch (InterruptedException e) {
