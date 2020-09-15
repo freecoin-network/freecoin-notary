@@ -17,7 +17,6 @@ DROP TABLE IF EXISTS `tron_deposit`;
 CREATE TABLE `tron_deposit` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `block_num` bigint unsigned NOT NULL COMMENT 'block num',
-  `mint_proposal_id` bigint unsigned NOT NULL COMMENT 'mint proposal id',
   `sender_on_side_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'sender on side chain',
   `amount` bigint unsigned NOT NULL COMMENT 'amount',
   `tx_on_side_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'tx on side chain',
@@ -25,8 +24,7 @@ CREATE TABLE `tron_deposit` (
   `status` tinyint unsigned NOT NULL COMMENT 'status',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_block_num_tx` (`block_num`,`tx_index_on_side_chain`),
-  UNIQUE KEY `uk_tx_id` (`tx_on_side_chain`),
-  UNIQUE KEY `uk_mint_proposal_id` (`mint_proposal_id`)
+  UNIQUE KEY `uk_tx_id` (`tx_on_side_chain`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `tron_deposit_meta` */

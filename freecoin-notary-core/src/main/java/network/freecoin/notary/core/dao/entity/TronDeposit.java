@@ -14,7 +14,6 @@ public class TronDeposit {
   @TableId(value = "id", type = IdType.AUTO)
   private long id;
   private long blockNum;
-  private long mintProposalId;
   private String senderOnSideChain;
   private long amount;
   private String txOnSideChain;

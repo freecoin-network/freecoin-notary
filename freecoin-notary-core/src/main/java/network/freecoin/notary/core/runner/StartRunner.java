@@ -50,22 +50,20 @@ public class StartRunner implements ApplicationRunner {
     List<TronDeposit> tronDepositList = tronDepositMapper.selectToHandleList();
     for (TronDeposit data : tronDepositList) {
       tronDepositHandler.handleTx(data.getSenderOnSideChain(), data.getAmount(),
-          data.getTxOnSideChain(), data.getBlockNum(), data.getMintProposalId());
+          data.getTxOnSideChain(), data.getBlockNum());
     }
 
-    long maxMintProposalId = tronDepositMapper.selectMaxMintProposalId();
-    long fromMintProposalId = maxMintProposalId + 1;
     long fromBlockNum;
     int fromTxIndex;
-    TronDeposit maxTronDeposit = tronDepositMapper.selectMaxDeposit(maxMintProposalId);
-    if (maxTronDeposit == null || maxTronDeposit.getBlockNum() < tronDepositMeta.getBlockNum()) {
+    TronDeposit lastTronDeposit = tronDepositMapper.selectLastDeposit();
+    if (lastTronDeposit == null || lastTronDeposit.getBlockNum() < tronDepositMeta.getBlockNum()) {
       fromBlockNum = tronDepositMeta.getBlockNum();
       fromTxIndex = tronDepositMeta.getTxIndexOnSideChain();
     } else {
-      fromBlockNum = maxTronDeposit.getBlockNum();
-      fromTxIndex = maxTronDeposit.getTxIndexOnSideChain() + 1;
+      fromBlockNum = lastTronDeposit.getBlockNum();
+      fromTxIndex = lastTronDeposit.getTxIndexOnSideChain() + 1;
     }
 
-    tronDepositListener.run(fromBlockNum, fromMintProposalId, fromTxIndex);
+    tronDepositListener.run(fromBlockNum, fromTxIndex);
   }
 }

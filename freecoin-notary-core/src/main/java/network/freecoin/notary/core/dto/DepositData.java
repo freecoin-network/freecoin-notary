@@ -8,7 +8,6 @@ import lombok.Data;
 public class DepositData {
 
   private long blockNum;
-  private long mintProposalId;
   private String senderOnSideChain;
   private long amount;
   private String txOnSideChain;

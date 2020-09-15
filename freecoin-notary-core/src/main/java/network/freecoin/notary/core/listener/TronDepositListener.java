@@ -36,11 +36,9 @@ public class TronDepositListener {
     isRunning = true;
   }
 
-  public void run(long fromBlockNum, long fromMintProposalId, int fromTxIndex) {
-    logger.info("fromBlockNum: {}, fromMintProposalId: {}, fromTxIndex: {}", fromBlockNum,
-        fromMintProposalId, fromTxIndex);
+  public void run(long fromBlockNum, int fromTxIndex) {
+    logger.info("fromBlockNum: {}, fromTxIndex: {}", fromBlockNum, fromTxIndex);
     long blockNum = fromBlockNum;
-    long mintProposalId = fromMintProposalId;
     while (isRunning) {
       Block block = blockInfoService.getBlockByNum(blockNum);
       if (waitingForNewBlock(block)) {
@@ -48,9 +46,9 @@ public class TronDepositListener {
       }
 
       TronDepositMeta tronDepositMeta = TronDepositMeta.builder()
+          .id(ConstSetting.TRON_DEPOSIT_META_ID)
           .blockNum(blockNum)
           .txIndexOnSideChain(0)
-          .id(ConstSetting.TRON_DEPOSIT_META_ID)
           .build();
       tronDepositMetaMapper.updateById(tronDepositMeta);
 
@@ -61,7 +59,7 @@ public class TronDepositListener {
       for (int txIndex = blockNum == fromBlockNum ? fromTxIndex : 0;
           txIndex < transactionList.size(); txIndex++) {
         Transaction transaction = transactionList.get(txIndex);
-        mintProposalId = preHandleTx(transaction, blockNum, mintProposalId, txIndex);
+        preHandleTx(transaction, blockNum, txIndex);
       }
 
       blockNum++;
@@ -83,11 +81,10 @@ public class TronDepositListener {
     return false;
   }
 
-  private long preHandleTx(Transaction transaction, long blockNum, long mintProposalId,
-      int txIndex) {
+  private void preHandleTx(Transaction transaction, long blockNum, int txIndex) {
     TronTxUtil tronTxUtil = new TronTxUtil(transaction);
     if (filter(tronTxUtil)) {
-      return mintProposalId;
+      return;
     }
     String sender = tronTxUtil.getOwner();
     long amount = tronTxUtil.getSunValue();
@@ -105,7 +102,6 @@ public class TronDepositListener {
     }
     TronDeposit tronDeposit = TronDeposit.builder()
         .blockNum(blockNum)
-        .mintProposalId(mintProposalId)
         .senderOnSideChain(sender)
         .amount(amount)
         .txOnSideChain(txId)
@@ -114,8 +110,7 @@ public class TronDepositListener {
         .build();
     // fixme: insert ignore
     tronDepositMapper.insert(tronDeposit);
-    tronDepositHandler.handleTx(sender, amount, txId, blockNum, mintProposalId);
-    return mintProposalId + 1;
+    tronDepositHandler.handleTx(sender, amount, txId, blockNum);
   }
 
   private boolean filter(TronTxUtil tronTxUtil) {

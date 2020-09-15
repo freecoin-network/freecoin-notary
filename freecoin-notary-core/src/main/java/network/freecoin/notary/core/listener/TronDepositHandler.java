@@ -15,14 +15,12 @@ public class TronDepositHandler {
   @Autowired
   private EthMinter ethMinter;
 
-  public void handleTx(String sender, long amount, String txId, long blockNum,
-      long mintProposalId) {
+  public void handleTx(String sender, long amount, String txId, long blockNum) {
 
-    ethMinter.mint(mintProposalId, sender, amount, txId);
+    // ethMinter.mint(sender, amount, txId);
 
     DepositData depositData = DepositData.builder()
         .blockNum(blockNum)
-        .mintProposalId(mintProposalId)
         .senderOnSideChain(sender)
         .amount(amount)
         .txOnSideChain(txId)
