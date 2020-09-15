@@ -33,10 +33,13 @@ public class EthMinter {
     this.isRunning = true;
   }
 
-  public void mint(long proposalId, String txSender, long amout, String txOnSideChain) {
+  public void mint(TronDeposit tronDeposit) {
+    String txSender = tronDeposit.getSenderOnSideChain();
+    long amout = tronDeposit.getAmount();
+    String txOnSideChain = tronDeposit.getTxOnSideChain();
     List<Credentials> crs = ethService.genSinger();
     crs.stream().forEach(cr -> {
-      ethService.sendTransaction(cr, proposalId, txSender, amout, txOnSideChain);
+      ethService.sendTransaction(cr, txSender, amout, txOnSideChain);
     });
   }
 

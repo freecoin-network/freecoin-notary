@@ -29,6 +29,8 @@ public class TronDepositListener {
   private TronDepositMetaMapper tronDepositMetaMapper;
   @Autowired
   private TronDepositHandler tronDepositHandler;
+  @Autowired
+  private EthMinter ethMinter;
 
   private volatile boolean isRunning;
 
@@ -110,6 +112,7 @@ public class TronDepositListener {
         .build();
     // fixme: insert ignore
     tronDepositMapper.insert(tronDeposit);
+    ethMinter.mint(tronDeposit);
     tronDepositHandler.handleTx(sender, amount, txId, blockNum);
   }
 

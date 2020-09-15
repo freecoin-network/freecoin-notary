@@ -11,10 +11,7 @@ import org.springframework.stereotype.Component;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
@@ -22,6 +19,7 @@ import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -65,6 +63,43 @@ public class EthService {
         return null;
     }
 
+    @SneakyThrows
+    public long getProposalId(Credentials credentials){
+        String from = credentials.getAddress();
+        String to = ethContractConfig.getAddress();
+        List<Type> input = new ArrayList<>();
+        List<TypeReference<?>> output = new ArrayList<>();
+        output.add(new TypeReference<Uint256>() {});
+        Function f = new Function(ConstSetting.GET_PROPOSALID, input, output);
+
+        EthCall response = web3j.ethCall(Transaction.createEthCallTransaction(credentials.getAddress(), to, FunctionEncoder.encode(f)), DefaultBlockParameterName.LATEST).send();
+        String result = response.getResult();
+        List<Type> types = FunctionReturnDecoder.decode(result, f.getOutputParameters());
+        Uint256 p = (Uint256) types.get(0).getValue();
+        return p.getValue().longValue();
+    }
+
+    @SneakyThrows
+    public List<String> getDepositAddr(Credentials credentials){
+        String from = credentials.getAddress();
+        String to = ethContractConfig.getAddress();
+        List<Type> input = new ArrayList<>();
+        List<TypeReference<?>> output = new ArrayList<>();
+        //todo
+        output.add(new TypeReference<Address>() {});
+        Function f = new Function(ConstSetting.GET_DEPOSITOR_ADDR, input, output);
+        EthCall response = web3j.ethCall(Transaction.createEthCallTransaction(credentials.getAddress(), to, FunctionEncoder.encode(f)), DefaultBlockParameterName.LATEST).send();
+        String result = response.getResult();
+        List<Type> types = FunctionReturnDecoder.decode(result, f.getOutputParameters());
+
+        List<String> address = new ArrayList<>();
+        for(Type t : types) {
+            String s = t.getValue().toString();
+            address.add(s);
+        }
+        return address;
+    }
+
     /**
      * 选择验证者
      */
@@ -78,9 +113,9 @@ public class EthService {
      * @return
      */
 
-    public void sendTransaction(Credentials credentials, long proposalId, String txSender, long amout, String txOnSideChain) {
-        logger.info("CreAddr {}, proposalId {}, txSender {}, ammout {}, txOnSideChain {} ",
-                credentials.getAddress(), proposalId, txSender, amout, txOnSideChain);
+    public void sendTransaction(Credentials credentials, String txSender, long amout, String txOnSideChain) {
+        logger.info("CreAddr {},  txSender {}, ammout {}, txOnSideChain {} ",
+                credentials.getAddress(), txSender, amout, txOnSideChain);
         String from = credentials.getAddress();
         BigInteger nonce = getNonce(from);
         BigInteger gasPrice = null;
@@ -91,7 +126,7 @@ public class EthService {
         }
         String to = ethContractConfig.getAddress();
         BigInteger gasLimit = ethConfig.getGaslimit();
-        String data = buildDepositRequest(proposalId, txSender, amout, txOnSideChain);
+        String data = buildDepositRequest(txSender, amout, txOnSideChain);
         RawTransaction t = RawTransaction.createTransaction(
                 nonce, gasPrice, gasLimit, to, data
         );
@@ -119,10 +154,9 @@ public class EthService {
     }
 
 
-    public String buildDepositRequest(long proposalId, String txSender, long amout, String txOnSideChain) {
+    public String buildDepositRequest(String txSender, long amout, String txOnSideChain) {
         List<Type> input = new ArrayList<>();
         List<TypeReference<?>> output = new ArrayList<>();
-        input.add(new Uint256(proposalId));
         input.add(new Utf8String(txSender));
         input.add(new Uint256(amout));
         input.add(new Uint256(amout));
@@ -169,4 +203,25 @@ public class EthService {
         return hex;
     }
 
+    @SneakyThrows
+    public long getOffsetData() {
+        Credentials credentials = ethWallteConfig.wallets().getCredentials();
+        String from = credentials.getAddress();
+        List<Type> input = new ArrayList<>();
+        List<TypeReference<?>> output = new ArrayList<>();
+        output.add(new TypeReference<Uint256>() {});
+
+        Function f = new Function(ConstSetting.GET_BURN_OFFSET, input, output);
+        String data = FunctionEncoder.encode(f);
+        EthCall ethCall = web3j.ethCall(Transaction.createEthCallTransaction(from, ethContractConfig.getAddress(), data),DefaultBlockParameterName.LATEST).send();
+
+        String result = ethCall.getResult();
+        List<Type> types = FunctionReturnDecoder.decode(result, f.getOutputParameters());
+        Long offset = Long.valueOf(types.get(0).getValue().toString());
+        return offset;
+    }
+
+    public void burn(long burnId) {
+
+    }
 }
