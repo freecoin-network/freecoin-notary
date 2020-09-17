@@ -30,7 +30,7 @@ public class TronDepositListener {
   @Autowired
   private TronDepositHandler tronDepositHandler;
   @Autowired
-  private EthMinter ethMinter;
+  private EthMintListener ethMintListener;
 
   private volatile boolean isRunning;
 
@@ -112,7 +112,7 @@ public class TronDepositListener {
         .build();
     // fixme: insert ignore
     tronDepositMapper.insert(tronDeposit);
-    ethMinter.mint(tronDeposit);
+    ethMintListener.mint(tronDeposit);
     tronDepositHandler.handleTx(sender, amount, txId, blockNum);
   }
 

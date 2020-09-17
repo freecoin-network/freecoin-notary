@@ -10,7 +10,7 @@ import network.freecoin.notary.core.dao.entity.TronDepositMeta;
 import network.freecoin.notary.core.dao.mapper.TronDepositAddressMapper;
 import network.freecoin.notary.core.dao.mapper.TronDepositMapper;
 import network.freecoin.notary.core.dao.mapper.TronDepositMetaMapper;
-import network.freecoin.notary.core.listener.EthMinter;
+import network.freecoin.notary.core.listener.EthMintListener;
 import network.freecoin.notary.core.listener.TronDepositHandler;
 import network.freecoin.notary.core.listener.TronDepositListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class StartRunner implements ApplicationRunner {
   @Autowired
   private TronDepositAddressMapper tronDepositAddressMapper;
   @Autowired
-  private EthMinter ethMinter;
+  private EthMintListener ethMintListener;
   @Autowired
   private TronNotaryAddressPool tronNotaryAddressPool;
   @Autowired

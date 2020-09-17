@@ -13,7 +13,7 @@ public class TronDepositHandler {
   @Autowired
   private TronDepositPool tronDepositPool;
   @Autowired
-  private EthMinter ethMinter;
+  private EthMintListener ethMintListener;
 
   public void handleTx(String sender, long amount, String txId, long blockNum) {
 

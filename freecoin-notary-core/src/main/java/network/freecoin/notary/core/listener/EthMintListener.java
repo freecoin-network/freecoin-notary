@@ -19,7 +19,7 @@ import org.web3j.crypto.Credentials;
 
 @Component
 @Slf4j
-public class EthMinter {
+public class EthMintListener {
 
   @Autowired
   private EthService ethService;
@@ -29,7 +29,7 @@ public class EthMinter {
   private TronDepositMapper tronDepositMapper;
   private volatile boolean isRunning;
 
-  public EthMinter() {
+  public EthMintListener() {
     this.isRunning = true;
   }
 
@@ -47,49 +47,38 @@ public class EthMinter {
     logger.info("start run ethListener");
     while (isRunning) {
       DepositData d = tronDepositPool.consume();
-      // long proposalId = d.getMintProposalId();
-      long proposalId = 0L; // fixme
-      Credentials c = ethService.getWallet();
       String trxSender = d.getSenderOnSideChain();
       long amount = d.getAmount();
       String txOnSideChain = d.getTxOnSideChain();
-      int retryCount = 6;
-      while (false == ethService.verifyMintTransaction(c, proposalId)) {
-        try {
-          Thread.sleep(30000);
-        } catch (InterruptedException e) {
-          logger.error("Thread Sleep {}", e.getMessage());
-        }
-        if (--retryCount <= 0) {
-          break;
-        }
-      }
-      // fixme delete mint_proposal_id
-      UpdateWrapper<TronDeposit> uw = new UpdateWrapper();
-      uw.eq("mint_proposal_id", proposalId);
 
-      if (retryCount == 0) {
-        TronDeposit newDeposit = TronDeposit.builder()
-            .amount(amount)
-            .txOnSideChain(txOnSideChain)
-            .senderOnSideChain(trxSender)
-            .status(2)
-            .build();
-        tronDepositMapper.update(newDeposit, uw);
-        logger.error("Mint Failed prososalId {}, amount {}", proposalId, amount);
+      try {
+        Thread.sleep(90000);
+      } catch (InterruptedException e) {
+        logger.error("Thread Sleep Error {}", e.getMessage());
       }
-      ; //todo failed
-      if (retryCount > 0) {
+
+      UpdateWrapper<TronDeposit> uw = new UpdateWrapper();
+      uw.eq("tx_on_side_chain", txOnSideChain);
+      if(ethService.verifyMintTransaction(txOnSideChain)) {
         TronDeposit newDeposit = TronDeposit.builder()
-            .amount(amount)
-            .txOnSideChain(txOnSideChain)
-            .senderOnSideChain(trxSender)
-            .status(1)
-            .build();
+                .amount(amount)
+                .txOnSideChain(txOnSideChain)
+                .senderOnSideChain(trxSender)
+                .status(1)
+                .build();
         tronDepositMapper.update(newDeposit, uw);
-        logger.info("Mint Success prososalId {}, amount {}", proposalId, amount);
+        logger.info("Mint Success txOnSideChain {}, amount {}", txOnSideChain, amount);
       }
-      ; //success
+      else{
+        TronDeposit newDeposit = TronDeposit.builder()
+                .amount(amount)
+                .txOnSideChain(txOnSideChain)
+                .senderOnSideChain(trxSender)
+                .status(2)
+                .build();
+        tronDepositMapper.update(newDeposit, uw);
+        logger.error("Mint Failed txOnSideChain {}, amount {}", txOnSideChain, amount);
+      }
     }
   }
 

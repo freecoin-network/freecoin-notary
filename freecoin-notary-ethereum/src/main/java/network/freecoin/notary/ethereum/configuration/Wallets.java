@@ -17,4 +17,6 @@ import java.util.List;
 public class Wallets {
 
     List<Credentials> walletList;
+
+    Credentials credentials;
 }

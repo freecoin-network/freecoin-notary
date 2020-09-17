@@ -38,7 +38,8 @@ eth:
   service: https://rinkeby.infura.io/v3/072097a24b7c4994912ccd66991d5300
   signer: 3
   contract:
-    address: "0xa7FeAe2326234EaF1318743a0Ac75e164eB66bab"
+    address: "0x56065a6496b1ccC8060F3f831e6485C15284BeC4"
+
   wallet:
     path: /Users/pengyuxiang/freecoin/wallet1
   gaslimit: 2100000

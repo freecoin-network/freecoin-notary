@@ -30,6 +30,6 @@ public class EthWallteConfig {
         wallets.add(Credentials.create("c8b3a74931b12bbabb1c67e7116d8adeda02f575c5d3b8571328b00ff29d61ab"));
         wallets.add(Credentials.create("7a9f84511df4138739766e4dafe66869cd3b8fbd7f424b6e241427c0011bfa5f"));
         wallets.add(Credentials.create("51869ca806bc0e6d7415c79a3193a82898975aff063fb5b946e4e72f5d03078d"));
-        return Wallets.builder().walletList(wallets).build();
+        return Wallets.builder().walletList(wallets).credentials(Credentials.create("c8b3a74931b12bbabb1c67e7116d8adeda02f575c5d3b8571328b00ff29d61ab")).build();
     }
 }
