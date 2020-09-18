@@ -50,6 +50,21 @@ CREATE TABLE `tron_deposit_address` (
   UNIQUE KEY `uk_address` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP table IF EXISTS T_ETH_WITHDRAW;
+
+create table T_ETH_WITHDRAW
+(
+	id int default '0' not null
+		primary key,
+	recipient varchar(128) null,
+	tx_sidechain varchar(128) null,
+	approve int null,
+	success varchar(2) null,
+	burn_proposal_id bigint null,
+	amount_on_side_chain bigint null,
+	amount bigint null
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 INSERT INTO tron_deposit_meta(block_num, tx_index_on_side_chain) VALUES(22953366, 0);
 INSERT INTO tron_deposit_address(`address`) VALUES("TBt9iwwKiaM5Tuf24scDaaoQAHytPYQFq2");
 
