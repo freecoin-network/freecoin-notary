@@ -16,6 +16,6 @@ import org.springframework.stereotype.Repository;
 public interface EthBurnInfoMapper extends BaseMapper<EthBurnInfo> {
 
 
-    @Select("select ifnull(max(burn_proposal_id), -1) from T_ETH_WITHDRAW where success = '1'")
+    @Select("select ifnull(max(burn_proposal_id), -1) from T_ETH_WITHDRAW where status = '1'")
     long getCurRecord();
 }

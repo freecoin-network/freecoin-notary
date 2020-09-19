@@ -49,6 +49,7 @@ public class EthMintListener {
       DepositData d = tronDepositPool.consume();
       String trxSender = d.getSenderOnSideChain();
       long amount = d.getAmount();
+      long blockNum = d.getBlockNum();
       String txOnSideChain = d.getTxOnSideChain();
 
       try {
@@ -61,6 +62,7 @@ public class EthMintListener {
       uw.eq("tx_on_side_chain", txOnSideChain);
       if(ethService.verifyMintTransaction(txOnSideChain)) {
         TronDeposit newDeposit = TronDeposit.builder()
+                .blockNum(blockNum)
                 .amount(amount)
                 .txOnSideChain(txOnSideChain)
                 .senderOnSideChain(trxSender)
@@ -71,6 +73,7 @@ public class EthMintListener {
       }
       else{
         TronDeposit newDeposit = TronDeposit.builder()
+                .blockNum(blockNum)
                 .amount(amount)
                 .txOnSideChain(txOnSideChain)
                 .senderOnSideChain(trxSender)

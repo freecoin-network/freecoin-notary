@@ -5,7 +5,7 @@ spring:
     name: freecoin-notary-core
   datasource:
     username: root
-    password: 12345678
+    password: death1993
     url: jdbc:mysql://localhost:3306/freecoin?characterEncoding=utf-8&useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
@@ -18,7 +18,7 @@ spring:
       # 配置获取连接等待超时的时间
       max-wait: 5000
       # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
-      time-between-eviction-runs-millis: 60000
+      time-between-eviction-runs-millis: 100000
       # 配置一个连接在池中最小生存的时间，单位是毫秒
       min-evictable-idle-time-millis: 30000
       validation-query: select 'x'
