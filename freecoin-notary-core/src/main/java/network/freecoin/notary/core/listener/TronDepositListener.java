@@ -29,8 +29,6 @@ public class TronDepositListener {
   private TronDepositMetaMapper tronDepositMetaMapper;
   @Autowired
   private TronDepositHandler tronDepositHandler;
-  @Autowired
-  private EthMintListener ethMintListener;
 
   private volatile boolean isRunning;
 
@@ -73,7 +71,7 @@ public class TronDepositListener {
       logger.info("waiting for generating new block: {}",
           block.getBlockHeader().getRawData().getNumber());
       try {
-        Thread.sleep(ConstSetting.WAITING_FOR_NEW_BLOCK__MS);
+        Thread.sleep(ConstSetting.WAITING_FOR_NEW_BLOCK_MS);
       } catch (InterruptedException e) {
         logger.warn("interrupted exception", e);
         Thread.currentThread().interrupt();
@@ -91,17 +89,7 @@ public class TronDepositListener {
     String sender = tronTxUtil.getOwner();
     long amount = tronTxUtil.getSunValue();
     String txId = tronTxUtil.getTxId();
-    long txTime = tronTxUtil.getTimestamp();
-    long now = System.currentTimeMillis();
-    long sleepTime = txTime + ConstSetting.RELAY_MS - now;
-    if (sleepTime > 0) {
-      try {
-        Thread.sleep(sleepTime);
-      } catch (InterruptedException e) {
-        logger.warn("interrupted exception", e);
-        Thread.currentThread().interrupt();
-      }
-    }
+    // todo: use solidity node
     TronDeposit tronDeposit = TronDeposit.builder()
         .blockNum(blockNum)
         .senderOnSideChain(sender)
@@ -112,7 +100,6 @@ public class TronDepositListener {
         .build();
     // fixme: insert ignore
     tronDepositMapper.insert(tronDeposit);
-    ethMintListener.mint(tronDeposit);
     tronDepositHandler.handleTx(sender, amount, txId, blockNum);
   }
 
