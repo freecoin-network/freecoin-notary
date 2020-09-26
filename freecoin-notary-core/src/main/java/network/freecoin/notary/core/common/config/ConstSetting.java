@@ -11,6 +11,8 @@ public class ConstSetting {
 
   public static final String WITHDRAW_SUCCESS = "1";
   public static final String WITHDRAW_FAILED = "2";
-  public static final String WITHDRAW_NO_VERIFY = "3";
+  public static final String WITHDRAW_NO_TRX_VERIFY = "3";
+  public static final String WITHDRAW_NO_ETH_CONFIRM = "4";
+  public static final String WITHDRAW_ETH_CONFIRM_FAILED = "5";
   public static final String WITHDRAW_INIT = "0";
 }

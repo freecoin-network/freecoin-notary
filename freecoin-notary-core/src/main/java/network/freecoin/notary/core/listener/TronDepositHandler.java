@@ -11,26 +11,26 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class TronDepositHandler {
 
-  @Autowired
-  private TronDepositPool tronDepositPool;
-  @Autowired
-  private EthMintListener ethMintListener;
+    @Autowired
+    private TronDepositPool tronDepositPool;
+    @Autowired
+    private EthMintListener ethMintListener;
 
-  public void handleTx(String sender, long amount, String txId, long blockNum) {
+    public void handleTx(String sender, long amount, String txId, long blockNum) {
 
-    TronDeposit tronDeposit = TronDeposit.builder()
-        .senderOnSideChain(sender)
-        .amount(amount)
-        .txOnSideChain(txId)
-        .build();
-    ethMintListener.mint(tronDeposit);
+        TronDeposit tronDeposit = TronDeposit.builder()
+                .senderOnSideChain(sender)
+                .amount(amount)
+                .txOnSideChain(txId)
+                .build();
+        ethMintListener.mint(tronDeposit);
 
-    DepositData depositData = DepositData.builder()
-        .blockNum(blockNum)
-        .senderOnSideChain(sender)
-        .amount(amount)
-        .txOnSideChain(txId)
-        .build();
-    tronDepositPool.produce(depositData);
-  }
+        DepositData depositData = DepositData.builder()
+                .blockNum(blockNum)
+                .senderOnSideChain(sender)
+                .amount(amount)
+                .txOnSideChain(txId)
+                .build();
+        tronDepositPool.produce(depositData);
+    }
 }

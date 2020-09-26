@@ -57,13 +57,28 @@ create table if not exists t_eth_withdraw
     id bigint default 0 not null
         primary key,
     recipient varchar(128) not null,
-    tx_on_side_chain varchar(128) not null,
+    tx_on_side_chain varchar(128),
     burn_proposal_id bigint not null,
     amount_on_side_chain bigint not null,
     amount bigint not null,
     approve bigint not null,
     status varchar(2) not null
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP table IF EXISTS t_eth_notary;
+create table t_eth_notary
+(
+    id bigint auto_increment
+        primary key,
+    credentials varchar(256) null,
+    type int default 0 null
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+insert into t_eth_notary(credentials, type) values("c8b3a74931b12bbabb1c67e7116d8adeda02f575c5d3b8571328b00ff29d61ab", "0");
+insert into t_eth_notary(credentials, type) values("7a9f84511df4138739766e4dafe66869cd3b8fbd7f424b6e241427c0011bfa5f", "0");
+insert into t_eth_notary(credentials, type) values("51869ca806bc0e6d7415c79a3193a82898975aff063fb5b946e4e72f5d03078d", "0");
+insert into t_eth_notary(credentials, type) values("c8b3a74931b12bbabb1c67e7116d8adeda02f575c5d3b8571328b00ff29d61ab", "1");
+
 
 INSERT INTO tron_deposit_meta(block_num, tx_index_on_side_chain) VALUES(22953366, 0);
 INSERT INTO tron_deposit_address(`address`) VALUES("TBt9iwwKiaM5Tuf24scDaaoQAHytPYQFq2");

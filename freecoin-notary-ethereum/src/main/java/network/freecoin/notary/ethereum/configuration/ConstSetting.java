@@ -1,12 +1,11 @@
 package network.freecoin.notary.ethereum.configuration;
 
-import org.springframework.stereotype.Component;
-
 
 public class ConstSetting {
 
-  public static final int TOKEN_CALL_VALUE = 0;
-  public static final long TOKEN_ID = 0;
+  public static final String ROPSTEN = "https://ropsten.infura.io/v3/072097a24b7c4994912ccd66991d5300";
+  public static final String RINKEBY = "https://rinkeby.infura.io/v3/072097a24b7c4994912ccd66991d5300";
+  public static final String MAINNET = "https://mainnet.infura.io/v3/072097a24b7c4994912ccd66991d5300";
 
   public static final String GET_ETH_ADDR = "";
   public static final String DEPOSIT_CONFIRM = "depositConfirm";
@@ -15,6 +14,8 @@ public class ConstSetting {
   public static final String GET_DEPOSITOR_ADDR = "getMintStatus";
   public static final String GET_BURN_OFFSET = "burnCount";
   public static final String GET_BURN_INFO = "getBurnInfo";
+  public static final String GET_BURN_STATUS = "getBurnStatus";
   public static final String WITHDRAW_CONFIRM = "withdrawConfirm";
 
+  private ConstSetting(){}
 }
