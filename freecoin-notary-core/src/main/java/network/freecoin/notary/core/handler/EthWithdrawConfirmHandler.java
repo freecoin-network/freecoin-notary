@@ -40,7 +40,6 @@ public class EthWithdrawConfirmHandler {
                 //提现失败，进行重试
                 e.setStatus(ConstSetting.WITHDRAW_ETH_CONFIRM_FAILED);
                 ethBurnInfoMapper.updateById(e);
-                ethWithdrawConfirmPool.produce(e);
             }
 
         }

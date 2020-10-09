@@ -46,14 +46,14 @@ public class EthNotaryService {
 
     private List<NotaryAccount> refreshNotaries() {
         List<String> crs = ethNotaryMapper.getNotary();
-        List<NotaryAccount> notaries = new ArrayList<>();
+        List<NotaryAccount> notary = new ArrayList<>();
         crs.forEach(c -> {
             NotaryAccount account = new NotaryAccount(Credentials.create(c));
             account.setGasLimit(BigInteger.valueOf(210000));
             account.setTo(ethContractConfig.getAddress());
-            notaries.add(account);
+            notary.add(account);
         });
-        return notaries;
+        return notary;
     }
 
     private NotaryAccount refreshSender() {
@@ -88,8 +88,8 @@ public class EthNotaryService {
                 .build();
     }
 
-    public boolean verifyMint(String mintProposalId){
-        return ethSender.verifyMintTransaction(mintProposalId);
+    public boolean verifyMint(String txOnSideChain){
+        return ethSender.verifyMintTransaction(txOnSideChain);
     }
 
     public String withdrawConfirmTransaction(long burnProposalId, long amountOnSideChain, String txOnSideChain) {

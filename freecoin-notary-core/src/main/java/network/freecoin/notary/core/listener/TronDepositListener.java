@@ -9,6 +9,7 @@ import network.freecoin.notary.core.dao.entity.TronDeposit;
 import network.freecoin.notary.core.dao.entity.TronDepositMeta;
 import network.freecoin.notary.core.dao.mapper.TronDepositMapper;
 import network.freecoin.notary.core.dao.mapper.TronDepositMetaMapper;
+import network.freecoin.notary.core.handler.TronDepositHandler;
 import network.freecoin.notary.tron.protos.Protocol.Block;
 import network.freecoin.notary.tron.protos.Protocol.Transaction;
 import network.freecoin.notary.tron.service.BlockInfoService;
@@ -55,7 +56,7 @@ public class TronDepositListener {
       logger.debug("block: {}", block);
 
       List<Transaction> transactionList = block.getTransactionsList();
-      // todo test order
+      // maintain the order
       for (int txIndex = blockNum == fromBlockNum ? fromTxIndex : 0;
           txIndex < transactionList.size(); txIndex++) {
         Transaction transaction = transactionList.get(txIndex);
@@ -98,7 +99,6 @@ public class TronDepositListener {
         .txIndexOnSideChain(txIndex)
         .status(0)
         .build();
-    // fixme: insert ignore
     tronDepositMapper.insert(tronDeposit);
     tronDepositHandler.handleTx(sender, amount, txId, blockNum);
   }

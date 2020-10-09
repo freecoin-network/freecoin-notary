@@ -43,7 +43,7 @@ public class EthMintListener {
         long amount = tronDeposit.getAmount();
         String txOnSideChain = tronDeposit.getTxOnSideChain();
         List<NotaryAccount> notaryAccounts = ethNotaryService.getNotaries();
-        notaryAccounts.forEach(n -> n.depositeConfirm(txSender, amount, txOnSideChain));
+        notaryAccounts.forEach(n -> n.depositConfirm(txSender, amount, txOnSideChain));
     }
 
     @SneakyThrows
@@ -57,9 +57,10 @@ public class EthMintListener {
             long blockNum = d.getBlockNum();
             String txOnSideChain = d.getTxOnSideChain();
 
+            // todo add timestamp
             //六个区块认证
             //todo 没有确认块高
-//
+
 //            long latest = ethNotaryService.getEthSender().getLatestBlockNum().longValue();
 //            while (latest - blockNum < 6) {
 //                latest = ethNotaryService.getEthSender().getLatestBlockNum().longValue();
@@ -68,8 +69,10 @@ public class EthMintListener {
 
             Thread.sleep(60_000);
 
-            UpdateWrapper<TronDeposit> uw = new UpdateWrapper();
-            uw.eq("tx_on_side_chain", 0);
+            // todo: end
+
+            UpdateWrapper<TronDeposit> uw = new UpdateWrapper<>();
+            uw.eq("tx_on_side_chain", txOnSideChain);
             if (ethNotaryService.verifyMint(txOnSideChain)) {
                 TronDeposit newDeposit = TronDeposit.builder()
                         .blockNum(blockNum)

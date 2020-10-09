@@ -30,7 +30,7 @@ public class NotaryAccount extends EthAccount{
      * mint - depositeConfirm
      * @param txOnSideChain
      */
-    public void depositeConfirm(String txSender, long amount, String txOnSideChain) {
+    public void depositConfirm(String txSender, long amount, String txOnSideChain) {
         logger.info("[DepositConfirm] CreAddr {},  txSender {}, amount {}, txOnSideChain {} ",
                 c.getAddress(), txSender, amount, txOnSideChain);
         List<Type> input = InputBuilder.build()
@@ -43,11 +43,11 @@ public class NotaryAccount extends EthAccount{
 
     /**
      * mint - verify mint
-     * @param mintProposalId
+     * @param txOnSideChain
      * @return
      */
-    public boolean verifyMintTransaction(String mintProposalId) {
-        List<Type> input = InputBuilder.build().addUtf8String(mintProposalId).get();
+    public boolean verifyMintTransaction(String txOnSideChain) {
+        List<Type> input = InputBuilder.build().addUtf8String(txOnSideChain).get();
         List<TypeReference<?>> output = OutputBuilder.build().addBool().get();
         List<Object> ret = call(to, ConstSetting.VERIFY_MINT, input, output);
         if(ret == null || ret.size() == 0) return false;

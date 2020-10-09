@@ -1,9 +1,10 @@
-package network.freecoin.notary.core.listener;
+package network.freecoin.notary.core.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import network.freecoin.notary.core.common.TronDepositPool;
 import network.freecoin.notary.core.dao.entity.TronDeposit;
 import network.freecoin.notary.core.dto.DepositData;
+import network.freecoin.notary.core.listener.EthMintListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,7 @@ public class TronDepositHandler {
                 .build();
         ethMintListener.mint(tronDeposit);
 
+        // todo add timestamp
         DepositData depositData = DepositData.builder()
                 .blockNum(blockNum)
                 .senderOnSideChain(sender)

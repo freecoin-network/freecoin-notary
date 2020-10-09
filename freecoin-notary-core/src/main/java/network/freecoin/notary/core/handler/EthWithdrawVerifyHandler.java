@@ -14,53 +14,54 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class EthWithdrawVerifyHandler {
-    @Autowired
-    private EthVerifyTrxTransPool ethVerifyTrxTransPool;
-    @Autowired
-    private EthWithdrawConfirmPool ethWithdrawConfirmPool;
-    @Autowired
-    private EthBurnInfoMapper ethBurnInfoMapper;
-    @Autowired
-    private EthNotaryService ethNotaryService;
 
-    private boolean isRunning;
+  @Autowired
+  private EthVerifyTrxTransPool ethVerifyTrxTransPool;
+  @Autowired
+  private EthWithdrawConfirmPool ethWithdrawConfirmPool;
+  @Autowired
+  private EthBurnInfoMapper ethBurnInfoMapper;
+  @Autowired
+  private EthNotaryService ethNotaryService;
 
-    public EthWithdrawVerifyHandler() {
-        this.isRunning = true;
+  private boolean isRunning;
+
+  public EthWithdrawVerifyHandler() {
+    this.isRunning = true;
+  }
+
+  private boolean verifyTrx() {
+    return true;
+  }
+
+  public void run() {
+    logger.info("Start EthWithdrawVerifyHandler");
+    while (isRunning) {
+      EthBurnInfo e = ethVerifyTrxTransPool.consume();
+      // todo add timestamp
+      if (verifyTrx()) {
+        //验证TRX交易成功，继续执行
+        e.setStatus(ConstSetting.WITHDRAW_NO_ETH_CONFIRM);
+        ethBurnInfoMapper.updateById(e);
+
+        String txId = ethNotaryService.withdrawConfirmTransaction(
+            e.getBurnProposalId(),
+            e.getAmountOnSideChain(),
+            e.getTxOnSideChain()
+        );
+        logger.info("Send WithdrawConfirm ({})", txId);
+
+        ethWithdrawConfirmPool.produce(e);
+      } else {
+        //TRX交易发送失败，直接进入失败状态
+        e.setStatus(ConstSetting.WITHDRAW_FAILED);
+        ethBurnInfoMapper.updateById(e);
+        logger.error("Verify burnProposalId{} failed", e.getBurnProposalId());
+      }
     }
+  }
 
-    private boolean verifyTrx(){
-        return true;
-    }
-
-    public void run() {
-        logger.info("Start EthWithdrawVerifyHandler");
-        while (isRunning) {
-            EthBurnInfo e = ethVerifyTrxTransPool.consume();
-            if(verifyTrx()) {
-                //验证TRX交易成功，继续执行
-                e.setStatus(ConstSetting.WITHDRAW_NO_ETH_CONFIRM);
-                ethBurnInfoMapper.updateById(e);
-            }
-            else {
-                //TRX交易发送失败，直接进入失败状态
-                e.setStatus(ConstSetting.WITHDRAW_FAILED);
-                ethBurnInfoMapper.updateById(e);
-                logger.error("Verify burnProposalId{} failed", e.getBurnProposalId());
-            }
-
-            String txId = ethNotaryService.withdrawConfirmTransaction(
-                    e.getBurnProposalId(),
-                    e.getAmountOnSideChain(),
-                    e.getTxOnSideChain()
-            );
-            logger.info("Send WithdrawConfirm ({})", txId);
-
-            ethWithdrawConfirmPool.produce(e);
-        }
-    }
-
-    public void stop() {
-        this.isRunning = false;
-    }
+  public void stop() {
+    this.isRunning = false;
+  }
 }

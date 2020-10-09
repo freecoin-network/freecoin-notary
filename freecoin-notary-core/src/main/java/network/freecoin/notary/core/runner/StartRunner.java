@@ -10,8 +10,8 @@ import network.freecoin.notary.core.dao.entity.TronDepositMeta;
 import network.freecoin.notary.core.dao.mapper.TronDepositAddressMapper;
 import network.freecoin.notary.core.dao.mapper.TronDepositMapper;
 import network.freecoin.notary.core.dao.mapper.TronDepositMetaMapper;
+import network.freecoin.notary.core.handler.TronDepositHandler;
 import network.freecoin.notary.core.listener.EthMintListener;
-import network.freecoin.notary.core.listener.TronDepositHandler;
 import network.freecoin.notary.core.listener.TronDepositListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -49,6 +49,8 @@ public class StartRunner implements ApplicationRunner {
 
     List<TronDeposit> tronDepositList = tronDepositMapper.selectToHandleList();
     for (TronDeposit data : tronDepositList) {
+      logger.info("continue to handle tx when start, [{}, {}, {}, {}]", data.getSenderOnSideChain(),
+          data.getAmount(), data.getTxOnSideChain(), data.getBlockNum());
       tronDepositHandler.handleTx(data.getSenderOnSideChain(), data.getAmount(),
           data.getTxOnSideChain(), data.getBlockNum());
     }
@@ -64,6 +66,6 @@ public class StartRunner implements ApplicationRunner {
       fromTxIndex = lastTronDeposit.getTxIndexOnSideChain() + 1;
     }
 
-    tronDepositListener.run(fromBlockNum, fromTxIndex);
+    new Thread(() -> tronDepositListener.run(fromBlockNum, fromTxIndex)).start();
   }
 }
