@@ -1,6 +1,9 @@
 package network.freecoin.notary.core.service;
 
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -18,87 +21,81 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 @Slf4j
 @Data
 public class EthNotaryService {
 
-    @Autowired
-    private EthContractConfig ethContractConfig;
+  @Autowired
+  private EthContractConfig ethContractConfig;
 
-    @Autowired
-    private EthNotaryMapper ethNotaryMapper;
+  @Autowired
+  private EthNotaryMapper ethNotaryMapper;
 
-    @Getter
-    private List<NotaryAccount> notaries;
+  @Getter
+  private List<NotaryAccount> notaries;
 
-    @Getter
-    private NotaryAccount ethSender;
+  @Getter
+  private NotaryAccount ethSender;
 
-    public void refresh() {
-        this.notaries = refreshNotaries();
-        this.ethSender = refreshSender();
-    }
+  public void refresh() {
+    this.notaries = refreshNotaries();
+    this.ethSender = refreshSender();
+  }
 
-    private List<NotaryAccount> refreshNotaries() {
-        List<String> crs = ethNotaryMapper.getNotary();
-        List<NotaryAccount> notary = new ArrayList<>();
-        crs.forEach(c -> {
-            NotaryAccount account = new NotaryAccount(Credentials.create(c));
-            account.setGasLimit(BigInteger.valueOf(210000));
-            account.setTo(ethContractConfig.getAddress());
-            notary.add(account);
-        });
-        return notary;
-    }
+  private List<NotaryAccount> refreshNotaries() {
+    List<String> crs = ethNotaryMapper.getNotary();
+    List<NotaryAccount> notary = new ArrayList<>();
+    crs.forEach(c -> {
+      NotaryAccount account = new NotaryAccount(Credentials.create(c));
+      account.setGasLimit(BigInteger.valueOf(210000));
+      account.setTo(ethContractConfig.getAddress());
+      notary.add(account);
+    });
+    return notary;
+  }
 
-    private NotaryAccount refreshSender() {
-        String s = ethNotaryMapper.getSender();
-        this.ethSender = new NotaryAccount(Credentials.create(s), ethContractConfig.getAddress());
-        this.ethSender.setGasLimit(BigInteger.valueOf(210000));
-        return this.ethSender;
-    }
+  private NotaryAccount refreshSender() {
+    String s = ethNotaryMapper.getSender();
+    this.ethSender = new NotaryAccount(Credentials.create(s), ethContractConfig.getAddress());
+    this.ethSender.setGasLimit(BigInteger.valueOf(210000));
+    return this.ethSender;
+  }
 
-    @SneakyThrows
-    public EthBurnInfo getBurnInfo(long burnProposalId) {
-        String to = ethContractConfig.getAddress();
-        List<Type> input = InputBuilder.build().addUInt256(burnProposalId).get();
-        List<TypeReference<?>> output = OutputBuilder.build()
-                .addAddress().addUint256().addUtf8String()
-                .addUint256().addUtf8String().addUint8().addBool().get();
-        List resolved = ethSender.call(to, ConstSetting.GET_BURN_INFO, input, output);
-        long amount = (long) resolved.get(1);
-        String recipient = (String) resolved.get(2);
-        long amoutOnSideChain = (long) resolved.get(3);
-        String txOnSideChain = (String) resolved.get(4);
-        long approve = (long) resolved.get(5);
-        boolean success = (boolean) resolved.get(6);
-        String status = success ? "1" : "0";
-        return EthBurnInfo.builder()
-                .amount(amount)
-                .recipient(recipient)
-                .amountOnSideChain(amoutOnSideChain)
-                .txOnSideChain(txOnSideChain)
-                .approve(approve)
-                .status(status)
-                .build();
-    }
+  @SneakyThrows
+  public EthBurnInfo getBurnInfo(long burnProposalId) {
+    String to = ethContractConfig.getAddress();
+    List<Type> input = InputBuilder.build().addUInt256(burnProposalId).get();
+    List<TypeReference<?>> output = OutputBuilder.build()
+        .addAddress().addUint256().addUtf8String()
+        .addUint256().addUtf8String().addUint8().addBool().get();
+    List<Object> resolved = ethSender.call(to, ConstSetting.GET_BURN_INFO, input, output);
+    long amount = (long) resolved.get(1);
+    String recipient = (String) resolved.get(2);
+    long approve = (long) resolved.get(5);
+    boolean success = (boolean) resolved.get(6);
+    String status = success ? "1" : "0";
+    return EthBurnInfo.builder()
+        .recipient(recipient)
+        .burnProposalId(burnProposalId)
+        .amount(amount)
+        .approve(approve)
+        .status(status)
+        .build();
+  }
 
-    public boolean verifyMint(String txOnSideChain){
-        return ethSender.verifyMintTransaction(txOnSideChain);
-    }
+  public boolean verifyMint(String txOnSideChain) {
+    return ethSender.verifyMintTransaction(txOnSideChain);
+  }
 
-    public String withdrawConfirmTransaction(long burnProposalId, long amountOnSideChain, String txOnSideChain) {
-        return ethSender.withdrawConfirmTransaction(burnProposalId, amountOnSideChain, txOnSideChain);
-    }
+  public String withdrawConfirmTransaction(long burnProposalId, long amountOnSideChain,
+      String txOnSideChain) {
+    return ethSender.withdrawConfirmTransaction(burnProposalId, amountOnSideChain, txOnSideChain);
+  }
 
-    public boolean getBurnStatus(long burnProposalId){
-        return ethSender.getBurnStatus(burnProposalId);
-    }
+  public boolean getBurnStatus(long burnProposalId) {
+    return ethSender.getBurnStatus(burnProposalId);
+  }
 
 
 }

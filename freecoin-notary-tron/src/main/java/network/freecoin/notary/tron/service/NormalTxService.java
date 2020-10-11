@@ -1,7 +1,5 @@
 package network.freecoin.notary.tron.service;
 
-import io.grpc.NameResolver.Args;
-import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import network.freecoin.notary.tron.client.WalletClient;

@@ -11,4 +11,5 @@ public class DepositData {
   private String senderOnSideChain;
   private long amount;
   private String txOnSideChain;
+  private long timestamp;
 }

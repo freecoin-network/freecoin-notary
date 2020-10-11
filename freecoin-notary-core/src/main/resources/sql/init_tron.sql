@@ -20,6 +20,7 @@ CREATE TABLE `tron_deposit` (
   `sender_on_side_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'sender on side chain',
   `amount` bigint unsigned NOT NULL COMMENT 'amount',
   `tx_on_side_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'tx on side chain',
+  `tx_on_main_chain` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT 'tx on main chain',
   `tx_index_on_side_chain` int unsigned NOT NULL COMMENT 'tx index on side chain',
   `status` tinyint unsigned NOT NULL COMMENT 'status',
   PRIMARY KEY (`id`),

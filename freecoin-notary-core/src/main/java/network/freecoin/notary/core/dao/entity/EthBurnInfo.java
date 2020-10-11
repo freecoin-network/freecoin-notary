@@ -1,7 +1,6 @@
 package network.freecoin.notary.core.dao.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -21,14 +20,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EthBurnInfo {
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private long id;
-
-    private String recipient;
-    private String txOnSideChain;
-    private long burnProposalId;
-    private long amountOnSideChain;
-    private long amount;
-    private long approve;
-    private String status;
+  @TableId(value = "id", type = IdType.AUTO)
+  private long id;
+  private String recipient;
+  private String txOnSideChain;
+  private long burnProposalId;
+  private long amountOnSideChain;
+  private long amount;
+  private long approve;
+  private String status;
 }

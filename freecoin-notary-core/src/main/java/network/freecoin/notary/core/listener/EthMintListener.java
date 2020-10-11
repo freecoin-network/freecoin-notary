@@ -1,19 +1,20 @@
 package network.freecoin.notary.core.listener;
 
+import static network.freecoin.notary.core.common.config.ConstSetting.ETH_CONFIRM_SECOND;
+
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import lombok.SneakyThrows;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import network.freecoin.notary.core.common.TronDepositPool;
 import network.freecoin.notary.core.dao.entity.TronDeposit;
 import network.freecoin.notary.core.dao.mapper.TronDepositMapper;
 import network.freecoin.notary.core.dto.DepositData;
+import network.freecoin.notary.core.handler.AlertHandler;
 import network.freecoin.notary.core.service.EthNotaryService;
 import network.freecoin.notary.ethereum.entity.NotaryAccount;
 import network.freecoin.notary.tron.service.BlockInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @author pengyuxiang
@@ -24,80 +25,80 @@ import java.util.List;
 @Slf4j
 public class EthMintListener {
 
-    @Autowired
-    private EthNotaryService ethNotaryService;
-    @Autowired
-    private TronDepositPool tronDepositPool;
-    @Autowired
-    private TronDepositMapper tronDepositMapper;
-    @Autowired
-    private BlockInfoService blockInfoService;
-    private volatile boolean isRunning;
+  @Autowired
+  private EthNotaryService ethNotaryService;
+  @Autowired
+  private TronDepositPool tronDepositPool;
+  @Autowired
+  private TronDepositMapper tronDepositMapper;
+  @Autowired
+  private BlockInfoService blockInfoService;
+  @Autowired
+  private AlertHandler alertHandler;
 
-    public EthMintListener() {
-        this.isRunning = true;
-    }
+  private volatile boolean isRunning;
 
-    public void mint(TronDeposit tronDeposit) {
-        String txSender = tronDeposit.getSenderOnSideChain();
-        long amount = tronDeposit.getAmount();
-        String txOnSideChain = tronDeposit.getTxOnSideChain();
-        List<NotaryAccount> notaryAccounts = ethNotaryService.getNotaries();
-        notaryAccounts.forEach(n -> n.depositConfirm(txSender, amount, txOnSideChain));
-    }
+  public EthMintListener() {
+    this.isRunning = true;
+  }
 
-    @SneakyThrows
-    public void run() {
-        logger.info("start run ethListener");
+  public void mint(TronDeposit tronDeposit) {
+    String txSender = tronDeposit.getSenderOnSideChain();
+    long amount = tronDeposit.getAmount();
+    String txOnSideChain = tronDeposit.getTxOnSideChain();
+    List<NotaryAccount> notaryAccounts = ethNotaryService.getNotaries();
+    notaryAccounts.forEach(n -> n.depositConfirm(txSender, amount, txOnSideChain));
+  }
 
-        while (isRunning) {
-            DepositData d = tronDepositPool.consume();
-            String trxSender = d.getSenderOnSideChain();
-            long amount = d.getAmount();
-            long blockNum = d.getBlockNum();
-            String txOnSideChain = d.getTxOnSideChain();
+  public void run() {
+    logger.info("start run ethListener");
 
-            // todo add timestamp
-            //六个区块认证
-            //todo 没有确认块高
+    try {
+      while (isRunning) {
+        DepositData d = tronDepositPool.consume();
+        long blockNum = d.getBlockNum();
+        String trxSender = d.getSenderOnSideChain();
+        long amount = d.getAmount();
+        String txOnSideChain = d.getTxOnSideChain();
+        long timestamp = d.getTimestamp();
 
-//            long latest = ethNotaryService.getEthSender().getLatestBlockNum().longValue();
-//            while (latest - blockNum < 6) {
-//                latest = ethNotaryService.getEthSender().getLatestBlockNum().longValue();
-//                Thread.sleep(15000);
-//            }
-
-            Thread.sleep(60_000);
-
-            // todo: end
-
-            UpdateWrapper<TronDeposit> uw = new UpdateWrapper<>();
-            uw.eq("tx_on_side_chain", txOnSideChain);
-            if (ethNotaryService.verifyMint(txOnSideChain)) {
-                TronDeposit newDeposit = TronDeposit.builder()
-                        .blockNum(blockNum)
-                        .amount(amount)
-                        .txOnSideChain(txOnSideChain)
-                        .senderOnSideChain(trxSender)
-                        .status(1)
-                        .build();
-                tronDepositMapper.update(newDeposit, uw);
-                logger.info("Mint Success txOnSideChain {}, amount {}", txOnSideChain, amount);
-            } else {
-                TronDeposit newDeposit = TronDeposit.builder()
-                        .blockNum(blockNum)
-                        .amount(amount)
-                        .txOnSideChain(txOnSideChain)
-                        .senderOnSideChain(trxSender)
-                        .status(2)
-                        .build();
-                tronDepositMapper.update(newDeposit, uw);
-                logger.error("Mint Failed txOnSideChain {}, amount {}", txOnSideChain, amount);
-            }
+        long now = System.currentTimeMillis() / 1_000;
+        long needSleepSecond = timestamp + ETH_CONFIRM_SECOND - now;
+        if (needSleepSecond > 0) {
+          Thread.sleep(needSleepSecond * 1_000);
         }
-    }
 
-    public void stop() {
-        this.isRunning = false;
+        UpdateWrapper<TronDeposit> uw = new UpdateWrapper<>();
+        uw.eq("tx_on_side_chain", txOnSideChain);
+        if (ethNotaryService.verifyMint(txOnSideChain)) {
+          TronDeposit newDeposit = TronDeposit.builder()
+              .blockNum(blockNum)
+              .amount(amount)
+              .txOnSideChain(txOnSideChain)
+              .senderOnSideChain(trxSender)
+              .status(1)
+              .build();
+          tronDepositMapper.update(newDeposit, uw);
+          logger.info("Mint Success txOnSideChain {}, amount {}", txOnSideChain, amount);
+        } else {
+          TronDeposit newDeposit = TronDeposit.builder()
+              .blockNum(blockNum)
+              .amount(amount)
+              .txOnSideChain(txOnSideChain)
+              .senderOnSideChain(trxSender)
+              .status(2)
+              .build();
+          tronDepositMapper.update(newDeposit, uw);
+          logger.error("Mint Failed txOnSideChain {}, amount {}", txOnSideChain, amount);
+          alertHandler.sendAlert("mint fail, handle next", null);
+        }
+      }
+    } catch (Exception e) {
+      alertHandler.sendAlert("listener loop break", e);
     }
+  }
+
+  public void stop() {
+    this.isRunning = false;
+  }
 }

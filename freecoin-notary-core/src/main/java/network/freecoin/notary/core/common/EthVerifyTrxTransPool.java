@@ -1,38 +1,38 @@
 package network.freecoin.notary.core.common;
 
 
-import lombok.extern.slf4j.Slf4j;
-import network.freecoin.notary.core.dao.entity.EthBurnInfo;
-import org.springframework.stereotype.Component;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import lombok.extern.slf4j.Slf4j;
+import network.freecoin.notary.core.dto.EthVerifyData;
+import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class EthVerifyTrxTransPool {
-    private BlockingQueue<EthBurnInfo> queue;
 
-    public EthVerifyTrxTransPool(){
-        this.queue = new LinkedBlockingQueue<>();
-    }
+  private BlockingQueue<EthVerifyData> queue;
 
-    public void produce(EthBurnInfo ethBurnInfo){
-        try {
-            queue.put(ethBurnInfo);
-        } catch (InterruptedException e) {
-            logger.warn("interrupted exception", e);
-            Thread.currentThread().interrupt();
-        }
-    }
+  public EthVerifyTrxTransPool() {
+    this.queue = new LinkedBlockingQueue<>();
+  }
 
-    public EthBurnInfo consume(){
-        try {
-            return queue.take();
-        } catch (InterruptedException e) {
-            logger.warn("interrupted exception", e);
-            Thread.currentThread().interrupt();
-        }
-        return null;
+  public void produce(EthVerifyData ethVerifyData) {
+    try {
+      queue.put(ethVerifyData);
+    } catch (InterruptedException e) {
+      logger.warn("interrupted exception", e);
+      Thread.currentThread().interrupt();
     }
+  }
+
+  public EthVerifyData consume() {
+    try {
+      return queue.take();
+    } catch (InterruptedException e) {
+      logger.warn("interrupted exception", e);
+      Thread.currentThread().interrupt();
+    }
+    return null;
+  }
 }

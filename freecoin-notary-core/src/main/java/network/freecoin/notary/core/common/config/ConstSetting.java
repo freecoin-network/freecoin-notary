@@ -15,4 +15,7 @@ public class ConstSetting {
   public static final String WITHDRAW_NO_ETH_CONFIRM = "4";
   public static final String WITHDRAW_ETH_CONFIRM_FAILED = "5";
   public static final String WITHDRAW_INIT = "0";
+  public static final long ETH_CONFIRM_SECOND = 90;
+  public static final long TRX_CONFIRM_SECOND = 60;
+
 }

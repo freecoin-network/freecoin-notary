@@ -26,12 +26,12 @@ public class TronDepositHandler {
                 .build();
         ethMintListener.mint(tronDeposit);
 
-        // todo add timestamp
         DepositData depositData = DepositData.builder()
                 .blockNum(blockNum)
                 .senderOnSideChain(sender)
                 .amount(amount)
                 .txOnSideChain(txId)
+                .timestamp(System.currentTimeMillis() / 1_000)
                 .build();
         tronDepositPool.produce(depositData);
     }

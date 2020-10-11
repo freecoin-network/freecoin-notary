@@ -7,9 +7,10 @@ import network.freecoin.notary.core.common.EthVerifyTrxTransPool;
 import network.freecoin.notary.core.common.config.ConstSetting;
 import network.freecoin.notary.core.dao.entity.EthBurnInfo;
 import network.freecoin.notary.core.dao.mapper.EthBurnInfoMapper;
+import network.freecoin.notary.core.dto.EthVerifyData;
+import network.freecoin.notary.core.handler.AlertHandler;
 import network.freecoin.notary.core.service.EthNotaryService;
 import network.freecoin.notary.ethereum.entity.NotaryAccount;
-import network.freecoin.notary.tron.protos.Protocol;
 import network.freecoin.notary.tron.service.BlockInfoService;
 import network.freecoin.notary.tron.service.NormalTxService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ public class EthWithdrawListener {
   private BlockInfoService blockInfoService;
   @Autowired
   private EthVerifyTrxTransPool ethVerifyTrxTransPool;
+  @Autowired
+  private AlertHandler alertHandler;
 
   private volatile boolean isRunning;
 
@@ -51,13 +54,6 @@ public class EthWithdrawListener {
         n -> n.withdrawConfirmTransaction(burnPorposalId, amountOnSideChain, txOnSideChain));
   }
 
-  public boolean verifyTrxTrans(String txId) {
-    Protocol.TransactionInfo txinfo = blockInfoService.getTransactionInfoById(txId);
-    boolean result = (txinfo.getResult() == Protocol.TransactionInfo.code.SUCESS);
-    //todo 未确认 看下要不要挪到 trx的service里面
-    return true;
-  }
-
   @SneakyThrows
   public void run() {
     logger.info("start run EthWithdrawListener");
@@ -69,39 +65,52 @@ public class EthWithdrawListener {
         logger.info("Start to Consume : recordOffset {} : nowOffset {}",
             recordOffset, nowOffset);
         long curOffset = recordOffset;
-        EthBurnInfo e = ethNotaryService.getBurnInfo(curOffset);
-        String recipient = e.getRecipient();
-        long amount = e.getAmount();
+        EthBurnInfo ethBurnInfo = ethNotaryService.getBurnInfo(curOffset);
+        String recipient = ethBurnInfo.getRecipient();
+        long amount = ethBurnInfo.getAmount();
         long amountOnSideChain = amount;
+        long approve = ethBurnInfo.getApprove();
 
-        logger.info("Send {} TRX to {}", amountOnSideChain, recipient);
-        EthBurnInfo ethBurnInfo = ethBurnInfoMapper.selectById(curOffset);
-        // todo: 之前失败的，应该在进函数之前处理好了
-        if (ethBurnInfo == null) {
-          ethBurnInfo = EthBurnInfo.builder()
-              .recipient(recipient)
-              .approve(e.getApprove())
-              .amountOnSideChain(amountOnSideChain)
-              .amount(amount)
-              .burnProposalId(curOffset)
-              .status(ConstSetting.WITHDRAW_INIT)
-              .build();
-          logger.info("Insert new BurnInfo curOffset({}) recipient({}), amount({})",
-              curOffset, recipient, amount);
-          ethBurnInfoMapper.insert(ethBurnInfo);
-        }
+        // fixme: 之前失败的，应该在进函数之前处理好了
+        // if (ethBurnInfo == null) {}
+        // EthBurnInfo ethBurnInfo = ethBurnInfoMapper.selectById(curOffset);
+
+        ethBurnInfo.setAmountOnSideChain(amountOnSideChain);
+        logger.info("Insert new BurnInfo curOffset({}) recipient({}), amount({})",
+            curOffset, recipient, amount);
+        ethBurnInfoMapper.insert(ethBurnInfo);
         //send trx when status is init or failed (no_verify not send)
+        // todo: init, fail will not retry when restart
         // fixme: always true
-        if (ethBurnInfo.getStatus().equals(ConstSetting.WITHDRAW_INIT)) {
-          //todo trx sendTransaction try-catch, if fail, set fail in db
-          // todo: init, fail will not retry when restart
-          //String txId = normalTxServic e.sendTrx(to, amooutOnSideChain);
-          String txId = "270e76453bccfa1ad0c9a1f84cc5b110c74f3692d48bc23c66a96d39b89";
-          ethBurnInfo.setTxOnSideChain(txId);
-          ethBurnInfo.setStatus(ConstSetting.WITHDRAW_NO_TRX_VERIFY);
-          ethBurnInfoMapper.updateById(ethBurnInfo);
+        // if (ethBurnInfo.getStatus().equals(ConstSetting.WITHDRAW_INIT)) {}
+
+        // todo: check "recipient" address format is right ?
+        logger.info("send {} trx to {}", amountOnSideChain, recipient);
+        String txId = "";
+        String status = ConstSetting.WITHDRAW_NO_TRX_VERIFY;
+        try {
+          txId = normalTxService.sendTrx(recipient, amountOnSideChain);
+        } catch (Exception e) {
+          status = ConstSetting.WITHDRAW_FAILED;
+          alertHandler.sendAlert("send trx fail, handle next", e);
         }
-        ethVerifyTrxTransPool.produce(ethBurnInfo);
+        ethBurnInfo.setTxOnSideChain(txId);
+        ethBurnInfo.setStatus(status);
+
+        // fixme: there is not "id" in dto
+        ethBurnInfoMapper.updateById(ethBurnInfo);
+        
+        EthVerifyData ethVerifyData = EthVerifyData.builder()
+            .recipient(recipient)
+            .txOnSideChain(txId)
+            .burnProposalId(curOffset)
+            .amountOnSideChain(amountOnSideChain)
+            .amount(amount)
+            .approve(approve)
+            .timestamp(System.currentTimeMillis() / 1_000)
+            .build();
+        ethVerifyTrxTransPool.produce(ethVerifyData);
+
         recordOffset++;
       }
     }
