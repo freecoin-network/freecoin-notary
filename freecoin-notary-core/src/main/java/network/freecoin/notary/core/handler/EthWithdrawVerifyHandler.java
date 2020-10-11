@@ -12,6 +12,7 @@ import network.freecoin.notary.core.dao.mapper.EthBurnInfoMapper;
 import network.freecoin.notary.core.dto.EthVerifyData;
 import network.freecoin.notary.core.service.EthNotaryService;
 import network.freecoin.notary.tron.protos.Protocol;
+import network.freecoin.notary.tron.protos.Protocol.TransactionInfo;
 import network.freecoin.notary.tron.service.BlockInfoService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class EthWithdrawVerifyHandler {
 
   private boolean verifyTrxTrans(String txId) {
     Protocol.TransactionInfo transactionInfo = blockInfoService.getTransactionInfoById(txId);
+    if (transactionInfo.equals(TransactionInfo.getDefaultInstance())) {
+      return false;
+    }
     return transactionInfo.getResult() == Protocol.TransactionInfo.code.SUCESS;
   }
 
