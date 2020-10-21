@@ -47,7 +47,6 @@ public class EthWithdrawConfirmHandler {
           ethBurnInfo.setStatus(ConstSetting.WITHDRAW_ETH_CONFIRM_FAILED);
           alertHandler.sendAlert("withdraw eth confirm fail, handle next", null);
         }
-        // fixme: no "id"
         ethBurnInfoMapper.updateById(ethBurnInfo);
       }
     } catch (Exception e) {

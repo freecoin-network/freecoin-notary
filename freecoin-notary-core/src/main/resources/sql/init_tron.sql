@@ -55,7 +55,7 @@ DROP table IF EXISTS t_eth_withdraw;
 
 create table if not exists t_eth_withdraw
 (
-    id bigint default 0 not null
+    id bigint auto_increment
         primary key,
     recipient varchar(128) not null,
     tx_on_side_chain varchar(128),

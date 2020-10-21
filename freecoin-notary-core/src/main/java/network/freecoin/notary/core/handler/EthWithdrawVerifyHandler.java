@@ -1,8 +1,6 @@
 package network.freecoin.notary.core.handler;
 
 
-import static network.freecoin.notary.core.common.config.ConstSetting.TRX_CONFIRM_SECOND;
-
 import lombok.extern.slf4j.Slf4j;
 import network.freecoin.notary.core.common.EthVerifyTrxTransPool;
 import network.freecoin.notary.core.common.EthWithdrawConfirmPool;
@@ -11,12 +9,15 @@ import network.freecoin.notary.core.dao.entity.EthBurnInfo;
 import network.freecoin.notary.core.dao.mapper.EthBurnInfoMapper;
 import network.freecoin.notary.core.dto.EthVerifyData;
 import network.freecoin.notary.core.service.EthNotaryService;
+import network.freecoin.notary.ethereum.entity.NotaryAccount;
 import network.freecoin.notary.tron.protos.Protocol;
 import network.freecoin.notary.tron.protos.Protocol.TransactionInfo;
 import network.freecoin.notary.tron.service.BlockInfoService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import java.util.List;
+import static network.freecoin.notary.core.common.config.ConstSetting.TRX_CONFIRM_SECOND;
 
 @Component
 @Slf4j
@@ -49,6 +50,15 @@ public class EthWithdrawVerifyHandler {
     return transactionInfo.getResult() == Protocol.TransactionInfo.code.SUCESS;
   }
 
+  public void withdrawConfirm(EthVerifyData ethVerifyData) {
+    long burnPorposalId = ethVerifyData.getBurnProposalId();
+    long amountOnSideChain = ethVerifyData.getAmountOnSideChain();
+    String txOnSideChain = ethVerifyData.getTxOnSideChain();
+    List<NotaryAccount> notaryies = ethNotaryService.getNotaries();
+    notaryies.forEach(
+            n -> n.withdrawConfirmTransaction(burnPorposalId, amountOnSideChain, txOnSideChain));
+  }
+
   public void run() {
     logger.info("Start EthWithdrawVerifyHandler");
     try {
@@ -66,24 +76,14 @@ public class EthWithdrawVerifyHandler {
         String txOnSideChain = ethVerifyData.getTxOnSideChain();
         if (verifyTrxTrans(txOnSideChain)) {
           ethBurnInfo.setStatus(ConstSetting.WITHDRAW_NO_ETH_CONFIRM);
-          // fixme: no "id"
           ethBurnInfoMapper.updateById(ethBurnInfo);
-
-          // todo: > 1 notary send
-          String txId = ethNotaryService.withdrawConfirmTransaction(
-              ethVerifyData.getBurnProposalId(),
-              ethVerifyData.getAmountOnSideChain(),
-              ethVerifyData.getTxOnSideChain()
-          );
-          logger.info("Send WithdrawConfirm ({})", txId);
-
+          this.withdrawConfirm(ethVerifyData);
           ethWithdrawConfirmPool.produce(ethVerifyData);
         } else {
           //TRX交易发送失败，直接进入失败状态
           ethBurnInfo.setStatus(ConstSetting.WITHDRAW_FAILED);
-          // fixme: no "id"
           ethBurnInfoMapper.updateById(ethBurnInfo);
-          logger.error("Verify burnProposalId{} failed", ethVerifyData.getBurnProposalId());
+          logger.error("Verify burnProposalId({}) failed", ethVerifyData.getBurnProposalId());
           alertHandler.sendAlert("send trx fail, handle next", null);
         }
       }
