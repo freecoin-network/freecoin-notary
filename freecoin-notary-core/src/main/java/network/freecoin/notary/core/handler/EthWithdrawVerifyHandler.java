@@ -17,7 +17,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.List;
-import static network.freecoin.notary.core.common.config.ConstSetting.TRX_CONFIRM_SECOND;
 
 @Component
 @Slf4j
@@ -66,7 +65,7 @@ public class EthWithdrawVerifyHandler {
         EthVerifyData ethVerifyData = ethVerifyTrxTransPool.consume();
         long timestamp = ethVerifyData.getTimestamp();
         long now = System.currentTimeMillis() / 1_000;
-        long needSleepSecond = timestamp + TRX_CONFIRM_SECOND - now;
+        long needSleepSecond = timestamp + ConstSetting.TRX_CONFIRM_SECOND - now;
         if (needSleepSecond > 0) {
           Thread.sleep(needSleepSecond * 1_000);
         }

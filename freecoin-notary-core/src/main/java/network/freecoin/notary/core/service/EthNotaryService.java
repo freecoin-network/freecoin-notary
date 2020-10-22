@@ -1,25 +1,24 @@
 package network.freecoin.notary.core.service;
 
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import network.freecoin.notary.core.common.utils.RSAUtils;
 import network.freecoin.notary.core.dao.entity.EthBurnInfo;
 import network.freecoin.notary.core.dao.mapper.EthNotaryMapper;
-import network.freecoin.notary.ethereum.configuration.ConstSetting;
-import network.freecoin.notary.ethereum.configuration.EthContractConfig;
-import network.freecoin.notary.ethereum.configuration.InputBuilder;
-import network.freecoin.notary.ethereum.configuration.OutputBuilder;
+import network.freecoin.notary.ethereum.configuration.*;
 import network.freecoin.notary.ethereum.entity.NotaryAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -28,13 +27,12 @@ public class EthNotaryService {
 
   @Autowired
   private EthContractConfig ethContractConfig;
-
   @Autowired
   private EthNotaryMapper ethNotaryMapper;
-
+  @Autowired
+  private EthConfig ethConfig;
   @Getter
   private List<NotaryAccount> notaries;
-
   @Getter
   private NotaryAccount ethSender;
 
@@ -47,17 +45,28 @@ public class EthNotaryService {
     List<String> crs = ethNotaryMapper.getNotary();
     List<NotaryAccount> notary = new ArrayList<>();
     crs.forEach(c -> {
-      NotaryAccount account = new NotaryAccount(Credentials.create(c));
-      account.setGasLimit(BigInteger.valueOf(210000));
-      account.setTo(ethContractConfig.getAddress());
-      notary.add(account);
+      try {
+        NotaryAccount account = new NotaryAccount(
+                Credentials.create(
+                        RSAUtils.decryptByPrivateKey(c, ethConfig.getPri())));
+        account.setGasLimit(BigInteger.valueOf(210000));
+        account.setTo(ethContractConfig.getAddress());
+        notary.add(account);
+      } catch (Exception e) {
+        logger.error("add notary error ({})", c);
+      }
     });
     return notary;
   }
 
   private NotaryAccount refreshSender() {
     String s = ethNotaryMapper.getSender();
-    this.ethSender = new NotaryAccount(Credentials.create(s), ethContractConfig.getAddress());
+    try {
+      String d = RSAUtils.decryptByPrivateKey(s, ethConfig.getPri());
+      this.ethSender = new NotaryAccount(Credentials.create(d), ethContractConfig.getAddress());
+    } catch (Exception e) {
+      logger.error("decrypt error {}", s);
+    }
     this.ethSender.setGasLimit(BigInteger.valueOf(210000));
     return this.ethSender;
   }
@@ -96,6 +105,4 @@ public class EthNotaryService {
   public boolean getBurnStatus(long burnProposalId) {
     return ethSender.getBurnStatus(burnProposalId);
   }
-
-
 }

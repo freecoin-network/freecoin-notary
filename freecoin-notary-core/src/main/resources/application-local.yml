@@ -43,6 +43,8 @@ eth:
   wallet:
     path: /Users/pengyuxiang/freecoin/wallet1
   gaslimit: 2100000
+  pub: "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzfUMEQ022zUnRjyQ8J27TG1kYoFJd6Pm8YbgjpkX9ApDHZlHTgB4wRwzRZiOol9RsQhlDEBK0tMAcwfZPG9goXtJgejr0pquOsC6xcbkqOK0UnKepbOUE67FHkOvbLPW+CzD1vxYLEJHO8ySQHUeTLEzbXyJkJCWLcE6zqEzlAQIDAQAB"
+  pri: "prikey"
 
 tron:
   fullnode:

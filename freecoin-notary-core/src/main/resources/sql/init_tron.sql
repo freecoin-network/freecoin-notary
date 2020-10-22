@@ -75,10 +75,10 @@ create table t_eth_notary
     type int default 0 null
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-insert into t_eth_notary(credentials, type) values("c8b3a74931b12bbabb1c67e7116d8adeda02f575c5d3b8571328b00ff29d61ab", "0");
-insert into t_eth_notary(credentials, type) values("7a9f84511df4138739766e4dafe66869cd3b8fbd7f424b6e241427c0011bfa5f", "0");
-insert into t_eth_notary(credentials, type) values("51869ca806bc0e6d7415c79a3193a82898975aff063fb5b946e4e72f5d03078d", "0");
-insert into t_eth_notary(credentials, type) values("c8b3a74931b12bbabb1c67e7116d8adeda02f575c5d3b8571328b00ff29d61ab", "1");
+insert into t_eth_notary(credentials, type) values("F3csxpm22CpqWw7EFKiltUpExraxfiyw8CkGqyEzvJdY6GRUKxgJHEa4ufU0bfZ7jx4fNtBygYrQe39mBIZJ3aM8eJQRvaYRnGyfYU3isRQy8XyKJSOPv6Kk6ozzWw8ZuKH33bu/iLDY0Bm5f/5B26msGSpDnNbfcnfjDlzqC+0=", "0");
+insert into t_eth_notary(credentials, type) values("Bf57nCVcRUVVWf1VloenvvkHSoC8JTF+UOhfIEOC8Gy+jvin/Seof2lhA/vPqYQyiblPDK5EVaQiqH7ILktpUDmFcukkqKiiWctqDyS9UKIsvCYUZc8FlkFDiwR687gzpbVWXU2LKDuBtCUBv7Zf8GVaGuBEyVTkJbVvmn9fDP8=", "0");
+insert into t_eth_notary(credentials, type) values("Bk1bhTWyRZey2nvWGOCmC39DE05PZZolRE+2rf1yZkJwq7pseg5kD6rRTL8gN8hDd2FmVjZiusV/PCvQfwsSGz3LFz8Zz/dyXShZquN+vHyt+bW8WBjJBbBwqEskQQ6Swjl41yEsg/epYomu5qRdNtNYdC5DKbD08iApBJZlbOc=", "0");
+insert into t_eth_notary(credentials, type) values("F3csxpm22CpqWw7EFKiltUpExraxfiyw8CkGqyEzvJdY6GRUKxgJHEa4ufU0bfZ7jx4fNtBygYrQe39mBIZJ3aM8eJQRvaYRnGyfYU3isRQy8XyKJSOPv6Kk6ozzWw8ZuKH33bu/iLDY0Bm5f/5B26msGSpDnNbfcnfjDlzqC+0=", "1");
 
 
 INSERT INTO tron_deposit_meta(block_num, tx_index_on_side_chain) VALUES(22953366, 0);

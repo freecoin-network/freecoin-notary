@@ -13,5 +13,7 @@ import java.math.BigInteger;
 public class EthConfig {
     private String service;
     private BigInteger gaslimit;
+    private String pub;
+    private String pri;
 
 }
